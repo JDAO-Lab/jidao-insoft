@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/css/other/form.css" />
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="formBox">
+    <form action="" class="layui-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+                    <input type="hidden" name="id" th:value="${sysRulesMenu.id}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">菜单父级</label>
+                        <div class="layui-input-block">
+                            <ul class="dtree" data-id="-1" id="selectParent" name="pid"></ul>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">菜单名称</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="title" placeholder="菜单名称"
+                                   type="text" th:value="${sysRulesMenu.title}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">页面描述</label>
+                        <div class="layui-input-block">
+                            <textarea name="description" placeholder="页面描述"  class="layui-textarea" maxlength="255">[[${sysRulesMenu.description}]]</textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">可用状态</label>
+                        <div class="layui-input-block">
+                            <input th:checked="${sysRulesMenu.enable eq 1}" lay-filter="isEnable" name="enable" title="启用" type="radio" value="1">
+                            <input th:checked="${sysRulesMenu.enable eq 0}" lay-filter="isEnable" name="enable" title="禁用" type="radio" value="0">
+                        </div>
+                    </div>
+                    <div class="layui-form-item" id="hrefItem">
+                        <label class="layui-form-label">菜单路径</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" lay-verify="required" class="layui-input" id="href" name="href" placeholder="菜单路径" th:value="${sysRulesMenu.href}"
+                                   type="text">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">打开方式</label>
+                        <div class="layui-input-block">
+                            <input th:checked="${sysRulesMenu.target eq '_self'}" lay-filter="target" name="target" title="_self" type="radio" value="_self">
+                            <input th:checked="${sysRulesMenu.target eq '_blank'}" lay-filter="target" name="target" title="_blank" type="radio" value="_blank">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">显示状态</label>
+                        <div class="layui-input-block">
+                            <input th:checked="${sysRulesMenu.hide eq 0}" checked lay-filter="isHide" name="hide" title="显示" type="radio" value="0">
+                            <input th:checked="${sysRulesMenu.hide eq 1}" lay-filter="isHide" name="hide" title="隐藏" type="radio" value="1">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">菜单图标</label>
+                        <div class="layui-input-block">
+                            <input class="layui-input" id="icon" value="layui-icon-home" lay-filter="icon" name="icon" type="text" th:value="${sysRulesMenu.icon}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">排序</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" name="sort" placeholder="排序" type="number" value="0" th:value="${sysRulesMenu.sort}">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">验证状态</label>
+                        <div class="layui-input-block">
+                            <input th:checked="${sysRulesMenu.allow eq 0}" lay-filter="isAllow" name="allow" title="开启" type="radio" value="0">
+                            <input th:checked="${sysRulesMenu.allow eq 1}" lay-filter="isAllow" name="allow" title="关闭" type="radio" value="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="formBoxBottom">
+            <div class="button-container">
+                <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="power-update" lay-submit="" type="submit">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button class="layui-btn layui-btn-sm" type="reset">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+    layui.use(['form', 'jquery', 'iconPicker', 'dtree'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let iconPicker = layui.iconPicker;
+        let dtree = layui.dtree;
+        let MODULE_PATH = "/admin/menus/";
+
+        iconPicker.render({
+            elem: '#icon',
+            type: 'fontClass',
+            search: true,
+            page: true,
+            limit: 28
+        });
+        //输出并直接选中默认参数
+        let theDtreeSelectedId = [[${sysRulesMenu.pid?: 0}]];
+        dtree.renderSelect({
+            elem: "#selectParent",
+            url: MODULE_PATH + "selectParent",
+            method: 'get',
+            selectInputName: {nodeId: "pid", context: "title"},
+            skin: "layui",
+            initLevel:99,
+            dataFormat: "levelRelationship",
+            response: {treeId: "id", parentId: "pid", title: "title",childName:"children"},
+            selectInitVal: theDtreeSelectedId.toString(),
+        });
+
+        form.render();
+        form.on('submit(power-update)', function (data) {
+            data.field.icon = "layui-icon " + data.field.icon;
+            data.field.selectParent_select_input = undefined;
+            $.ajax({
+                url: MODULE_PATH+'update',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status==200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.treetable.reload("#SysMenusTable");
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            })
+            return false;
+        });
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_base::custonStyleFrom"></th:block>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="layui-tab-content">
+    <div class="pear-container">
+        <div class="layui-card">
+            <div class="layui-card-header"> [[${title}]] </div>
+            <div class="layui-card-body">
+                <form class="layui-form" onsubmit="return false;">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">默认标题 (logo.title)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="logo_title" required  lay-verify="required" placeholder="用于主题显示的英文标题" maxlength="12" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">提示：字数限制在12个以内！</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">图标 (logo.image)</label>
+                        <div class="layui-input-block">
+                            <input type="text" style="cursor: pointer;" readonly name="logo_image" id="upload"  placeholder="点我即可上传！" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">提示：点击文本框即可上传和替换默认图片路径！</div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">菜单API地址 (menu.data)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="menu_data" required  lay-verify="required" placeholder="相对路径url，例：/admin/get_menu"  autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">相对路径的url信息，请求方式默认为Get，后台自动填充。</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">默认菜单（tab.index）</label>
+                        <div class="layui-input-block">
+                            <select name="tab_index_id" lay-verify="required" lay-filter="tab_index_id">
+                                <option value="">请选择</option>
+                                <block th:each="item,index: ${menus}">
+                                    <option th:value="${item.id}" th:text="${item.title}">控制台</option>
+                                </block>
+                            </select>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">选中一个默认菜单后，后台会自动同步更新menu.select，index的id\title\href其他参数。</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">标签最大限制（tab.max）</label>
+                        <div class="layui-input-block">
+                            <select name="tab_max" lay-verify="required">
+                                <option value="12">最多12个标签</option>
+                                <option value="30">最多30个标签</option>
+                            </select>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">最大标签数，可支持打开的标签数~</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">默认菜单风格（theme.defaultMenu）</label>
+                        <div class="layui-input-block">
+                            <select name="theme_defaultMenu" lay-verify="required">
+                                <option value="dark-theme">dark-theme</option>
+                                <option value="light-theme">light-theme</option>
+                            </select>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">默认菜单风格，选中后，系统用户最初的菜单风格信息。</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">默认顶栏风格（theme.defaultHeader）</label>
+                        <div class="layui-input-block">
+                            <select name="theme_defaultHeader" lay-verify="required">
+                                <option value="dark-theme">dark-theme</option>
+                                <option value="light-theme">light-theme</option>
+                                <option value="auto-theme">auto-theme</option>
+                            </select>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">默认顶栏风格，选中后，系统用户最初的默认顶栏风格信息。</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">开启页脚 (other.footer)</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="other_footer" value="false" title="关闭">
+                            <input type="radio" name="other_footer" value="true" title="开启" checked>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">加载时间（other.keepLoad）</label>
+                        <div class="layui-input-block">
+                            <select name="other_keepLoad" lay-verify="required">
+                                <option value="50">50ms</option>
+                                <option value="100">100ms</option>
+                                <option value="200">200ms</option>
+                                <option value="300">300ms</option>
+                                <option value="500">800ms</option>
+                                <option value="800">800ms</option>
+                                <option value="900">900ms</option>
+                                <option value="1000">1000ms</option>
+                                <option value="1200">1200ms</option>
+                            </select>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">单位毫秒，动态加载款加载缓冲时间，越短越快~</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">自动头部 (other.autoHead)</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="other_autoHead" value="false" title="关闭">
+                            <input type="radio" name="other_autoHead" value="true" title="开启" checked>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-submit lay-filter="submitThemeSettingForm">保存配置</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script th:inline="javascript">
+    //Demo
+    layui.use(['form','upload'], function(){
+        let form = layui.form;
+        let upload = layui.upload;
+        //执行实例
+        let uploadInst = upload.render({
+            elem: '#upload', //绑定元素
+            url: '/upload', //上传接口
+            done: function(res){
+                //上传完毕回调
+                console.log(res);
+                if(res.code == 0){
+                    //do something （比如将res返回的图片链接保存到表单的隐藏域）
+                    $('#upload').val(res.data);
+                }
+                layer.msg(res.msg);
+            },
+            error: function(res){
+                //请求异常回调
+                layer.msg(res.msg);
+            }
+        });
+        //实例发json字符串为json对象
+        var themeConfig = JSON.parse(/*[[${themeConfigJson}]]*/ {});
+        console.log(themeConfig.logo.title);
+        // 模拟从后端获取的 JSON 数据
+        var inputData = {
+            "logo_title": themeConfig.logo.title,
+            "logo_image": themeConfig.logo.image,
+            "menu_data":themeConfig.menu.data,
+            // 其他字段
+            "tab_index_id":themeConfig.tab.index.id,
+            "tab_max":themeConfig.tab.max,
+            "theme_defaultHeader":themeConfig.theme.defaultHeader,
+            "theme_defaultMenu":themeConfig.theme.defaultMenu,
+            "other_keepLoad":themeConfig.other.keepLoad
+        };
+
+        // 自动填充表单
+        for (var key in inputData) {
+            var value = inputData[key];
+            $('[name="' + key + '"]').val(value);
+        }
+        //开启页脚 单选框
+        var other_footer = themeConfig.other.footer;
+        $('[name="other_footer"][value="'+other_footer+'"]').prop("checked", true);
+        //自动头部 单选框
+        var other_autoHead = themeConfig.other.autoHead;
+        $('[name="other_autoHead"][value="'+other_autoHead+'"]').prop("checked", true);
+        //必须重新渲染，不然加载不出来
+        form.render();
+        //提交
+        // 监听tab_index_id的数据变化
+        var menus = /*[[${menus}]]*/ {};
+        form.on('select(tab_index_id)', function(data){
+            var selectedValue = data.value; // 获取选中的值
+            console.log('Selected value: ' + selectedValue);
+            // 遍历menus数组
+            menus.forEach(function(menu) {
+                if (menu.id == selectedValue) {
+                    console.log('Selected menu: ' + JSON.stringify(menu)); // 输出选中的菜单信息
+                    themeConfig.tab.index.title = menu.title;
+                    themeConfig.tab.index.href = menu.href;
+                    themeConfig.menu.select = selectedValue;
+                }
+            });
+        });
+        form.on('submit(submitThemeSettingForm)', function(data){
+            // 获取表单数据
+            var formData = data.field;
+            // 修改主题配置信息，提交到后台直接保存
+            themeConfig.logo.title = formData.logo_title;
+            themeConfig.logo.image = formData.logo_image;
+            themeConfig.menu.data = formData.menu_data;
+            themeConfig.tab.index.id = formData.tab_index_id;
+            themeConfig.tab.max = formData.tab_max;
+            themeConfig.theme.defaultHeader = formData.theme_defaultHeader;
+            themeConfig.theme.defaultMenu = formData.theme_defaultMenu;
+            themeConfig.other.keepLoad = formData.other_keepLoad;
+            themeConfig.other.footer = formData.other_footer;
+            themeConfig.other.autoHead = formData.other_autoHead;
+
+            // 发起 POST 请求
+            $.ajax({
+                url: '/admin/theme_setting',
+                type: 'POST',
+                data: {themeConfig:JSON.stringify(themeConfig)},
+                success: function(response) {
+                    console.log(response);
+                    // 处理成功响应
+                    layer.msg(response.message);
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    // 处理错误情况
+                    layer.msg(response.message);
+                }
+            });
+            return false; // 阻止表单跳转
+        });
+    });
+</script>
+
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+</head>
+<body>
+<div style="padding: 16px;">
+    <div class="layui-card">
+        <th:block th:replace="fragments/custom_table::commonTitle"></th:block>
+        <div class="layui-card-body">
+            <table class="layui-hide" id="LogYinTable" lay-filter="LogYinTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="toolbarCommon">
+    <div class="layui-btn-container">
+
+    </div>
+    <div class="layui-row" style="margin-top: 10px">
+        <form class="layui-form layui-row layui-col-space16">
+            <div class="layui-col-sm3">
+                <input type="text" name="ip" placeholder="填写ip参数" lay-affix="clear" class="layui-input">
+            </div>
+            <div class="layui-col-sm3">
+                <div class="layui-input-wrap">
+                    <input type="text" name="path" placeholder="根据访问路径" lay-affix="clear" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-col-sm3">
+                <input type="text" name="remarks" placeholder="根据操作备注" lay-affix="clear" class="layui-input">
+            </div>
+            <div class="layui-btn-container layui-col-sm3">
+                <button class="layui-btn layui-btn-sm" lay-submit lay-filter="searchForm">检索</button>
+                <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary">重置</button>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script th:inline="javascript">
+    $(function () {
+        //声明配置初始化表格
+        let initConfig = {
+            //请求路径
+            "tableName":"LogYinTable",
+            //此处工具栏要配置名称正确，否则不会显示
+            "toolBarName":"toolbarCommon",
+            "tableUrl":"/admin/log/sys_log/list",
+            "searchFormName":"searchForm",
+            //设置表头
+            "tableCols":[
+                [
+                    {"field":"id","fixed":"left","width":80,"title":"ID","sort":true},
+                    {"field":"ip","width":200,"title":"来访IP地址"},
+                    {"field":"path","title":"访问URL","width":280},
+                    {"field":"remarks","width":380,"title":"操作备注","sort":true},
+                    {"field":"method","width":280,"title":"访问方式","sort":true},
+                    {"field":"resultText","title":"访问结果","width":120},
+                    {"field":"createdAt","width":290,"title":"操作日期","sort":true}
+                ]
+            ],
+            "menuDesc": /*[[${menu_desc}]]*/ ""
+        };
+        //初始化表单信息
+        layui.use(["table", "dropdown", "form"], function () {
+            // ...原有的代码...
+            let table = layui.table;
+            let form = layui.form;
+            let tableUrl = initConfig.tableUrl;//数据路径
+            let tableCols= initConfig.tableCols;//每页表头
+            let menuDesc= initConfig.menuDesc;//每页描述
+            let tableName = initConfig.tableName;//表格名 每页都不用
+            let toolBarName = initConfig.toolBarName;//滚动条名 每页都不同
+            let searchFormName = initConfig.searchFormName;//搜索表单名 每页都不同
+            //搜索demo
+            form.on('submit('+searchFormName+')', function(data){
+                let formData = data.field;
+                table.reloadData(tableName, {
+                    where: formData,
+                });
+                return false; // 阻止默认 form 跳转
+            });
+            // 创建渲染实例
+            table.render({
+                elem: "#"+tableName,
+                url: tableUrl, //此处填写后端分页接口
+                toolbar: "#"+toolBarName,
+                defaultToolbar: [{
+                    layEvent: 'refresh',
+                    icon: 'layui-icon-refresh',
+                    title: '刷新'
+                },"filter", "exports", "print", {
+                    title: "本页描述",
+                    layEvent: "LAYTABLE_TIPS",
+                    icon: "layui-icon-tips"
+                }],
+                height: "full-35", // 最大高度减去其他容器已占有的高度差
+                page: {
+                    limit: 20 // 每页显示20条数据
+                },
+                css: [ // 重设当前表格样式
+                    ".layui-table-tool-temp{padding-right: 145px;}"
+                ].join(""),
+                cellMinWidth: 80,
+                totalRow: false, // 开启合计行
+                cols: tableCols
+            });
+
+            // 工具栏事件
+            table.on("toolbar("+tableName+")", function (obj) {
+                switch (obj.event) {
+                    case "refresh":
+                        table.reload(tableName, {
+                            where: {},
+                        });
+                        break;
+                    case "LAYTABLE_TIPS":
+                        layer.alert(menuDesc);
+                        break;
+                };
+            });
+        });
+    })
+</script>
+</body>
+</html>

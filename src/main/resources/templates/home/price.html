@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="pan-tbox">
+                <h2 class="pan-title">价格</h2>
+                <p class="pan-desc">
+                    即刻享有更多、更便捷、更专属、更高效的功能~
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="pay-box">
+
+
+                <th:block th:each="item,index : ${incomeList}">
+                <div class="pay-price">
+                    <div class="pay-price-title">
+                        <h3 th:text="${item.name}">服务名称</h3>
+                    </div>
+                    <div class="pay-price-desc">
+                        <div class="pay-price-info">
+                            <p class="pay-price-num" th:text="'￥'+${item.price}">￥980.00</p>
+                            <p class="pay-price-day" th:text="${item.duration == -1 ? '永久有效' : '/' + item.duration + '天'}">/365天</p>
+                        </div>
+                        <div class="pay-price-about" th:text="${item.description}">
+                            服务描述
+                        </div>
+                        <div class="pay-price-btn">
+                            <a th:href="'/users/order?income_id='+${item.id}" class="layui-btn layui-btn-warm layui-btn-fluid">
+                                立即购买
+                            </a>
+                            <p class="pay-price-discount">
+                                <span th:text="${item.discount >0 ?'折扣：'+item.discount+'%':'暂无折扣优惠'}">限时折扣：95% </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="pay-price-content">
+                        <p th:each="privilege : ${item.privilegeList}"
+                           class="pay-price-content-item">
+                            <i th:class="${privilege.allow == '1' ? 'layui-icon layui-icon-ok' : 'layui-icon layui-icon-close'}"></i>
+                            <span th:text="${privilege.name}">特权名称</span>
+                        </p>
+                    </div>
+                </div>
+                </th:block>
+
+
+            </div>
+
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="tips-bar">
+                您的购买将是对我们最大的支持~
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+</html>

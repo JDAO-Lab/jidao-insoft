@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_base::custonStyleFrom"></th:block>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="layui-tab-content">
+    <div class="pear-container">
+        <div class="layui-card">
+            <div class="layui-card-header"> [[${title}]] </div>
+            <div class="layui-card-body">
+                <form class="layui-form" onsubmit="return false;">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">标题 (sys.web_site)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="web_site" required  lay-verify="required" placeholder="用于首页显示的大标题。"  autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">提示：用于搜索引擎收录的长标题！</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">短标题 (sys.short_title)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="short_title" required  lay-verify="required" placeholder="用于子页面显示的短标题信息。"  autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">提示：字数建议在5个以内！</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">ICO (sys.web_ico)</label>
+                        <div class="layui-input-block">
+                            <input type="text" style="cursor: pointer;" readonly name="web_ico" id="webIco"  placeholder="点我即可上传！" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">提示：ico浏览器图标！</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">关键词 (sys.web_keywords)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="web_keywords" required  lay-verify="required" placeholder="SEO关键词"  autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">提示：多个以英文,号隔开，主要用于前台界面的seo使用。</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">描述 (sys.web_description)</label>
+                        <div class="layui-input-block">
+                            <textarea name="web_description" required lay-verify="required" placeholder="简短的100至200个字描述网站的定位。"  class="layui-textarea"></textarea>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">网站的简介，用于首页的描述标签展示，目的是让搜索引擎更好的抓取网站。</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">特点说明 (sys.characteristic)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="characteristic" required  lay-verify="required" maxlength="6" placeholder="显示在首页头条的字词"  autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">不得超过5个汉字！</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">特点描述 (sys.characteristic_description)</label>
+                        <div class="layui-input-block">
+                            <textarea name="characteristic_description" required lay-verify="required" placeholder="简短的100个字描述特点。"  maxlength="100" class="layui-textarea"></textarea>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">显示在首页，特点字词下方的描述~</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">ICP备案号 (sys.icp_number)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="icp_number"    placeholder="京ICP备xxxx号"  autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">在网站备案完毕后获得的备案号，例：京ICP备xxxx号！</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">ICP地址 (sys.icp_href)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="icp_href"    placeholder="工信部备案官网连接" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">用于更新和替换icp备案号连接的网址！</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">统计代码 (sys.static_script)</label>
+                        <div class="layui-input-block">
+                            <textarea name="static_script"   placeholder="统计代码脚本，会在前台的底部模块中关联！"  class="layui-textarea"></textarea>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">诸如百度统计、友盟统计等统计平台的代码片段。</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">后台加密 (sys.admin_key)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="admin_key"    placeholder="后台地址加密，此处输入明文！" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">用于隐藏后台管理系统登录界面!<span id="adminUrlTips">当前地址：<a th:href="${adminLoginUrl}" th:text="${adminLoginUrl}"></a></span></div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">著作人 (sys.author)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="author"    placeholder="著作人" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">页脚版权信息处显示用途~</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">客服链接 (sys.customer_service)</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="customer_service"  placeholder="QQ链接或客服系统链接" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">用于显示在客服部分，点击后可进入到客服系统！</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-submit lay-filter="submitSettingForm">保存配置</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script th:inline="javascript">
+    //Demo
+    layui.use(['form','upload'], function(){
+        let form = layui.form;
+        let upload = layui.upload;
+        let webIco = upload.render({
+            elem: '#webIco', //绑定元素
+            url: '/upload', //上传接口
+            exts: 'ico|png|jpg',
+            done: function(res){
+                //上传完毕回调
+                console.log(res);
+                if(res.code == 0){
+                    //do something （比如将res返回的图片链接保存到表单的隐藏域）
+                    $("#webIco").val(res.data);
+                }
+                layer.msg(res.msg);
+            },
+            error: function(res){
+                //请求异常回调
+                layer.msg(res.msg);
+            }
+        });
+        // 模拟从后端获取的 JSON 数据
+        var inputData = {
+            "web_site": /*[[${sys.web_site}]]*/ "",
+            "short_title": /*[[${sys.short_title}]]*/ "",
+            "web_ico": /*[[${sys.web_ico}]]*/ "",
+            "web_keywords": /*[[${sys.web_keywords}]]*/ "",
+            "web_description": /*[[${sys.web_description}]]*/ "",
+            "icp_number": /*[[${sys.icp_number}]]*/ "",
+            "icp_href": /*[[${sys.icp_href}]]*/ "",
+            "static_script": /*[[${sys.static_script}]]*/ "",
+            "admin_key": /*[[${sys.admin_key}]]*/ "",
+            "characteristic": /*[[${sys.characteristic}]]*/ "",
+            "characteristic_description": /*[[${sys.characteristic_description}]]*/ "",
+            "author": /*[[${sys.author}]]*/ ""
+        };
+
+        // 自动填充表单
+        for (var key in inputData) {
+            var value = inputData[key];
+            $('[name="' + key + '"]').val(value);
+        }
+        //必须重新渲染，不然加载不出来
+        form.render();
+        //提交 记住表单名称不能一样，会导致冲突！
+        form.on('submit(submitSettingForm)', function(data){
+            var formData = data.field;
+            // 发起 POST 请求
+            $.ajax({
+                url: '/admin/setting',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    console.log(response);
+                    // 处理成功响应
+                    layer.msg(response.message);
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    // 处理错误情况
+                    layer.msg(response.message);
+                }
+            });
+            return false; // 阻止表单跳转
+        });
+    });
+</script>
+
+</html>

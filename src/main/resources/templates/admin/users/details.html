@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <table class="layui-table layui-table-sm">
+
+                <tbody>
+                <tr>
+                    <td>用户ID:</td>
+                    <td th:text="${webUsers.id}"></td>
+                </tr>
+                <tr>
+                    <td>用户名:</td>
+                    <td th:text="${webUsers.username}"></td>
+                </tr>
+                <tr>
+                    <td>用户昵称:</td>
+                    <td th:text="${webUsers.nickname}"></td>
+                </tr>
+                <tr>
+                    <td>性别:</td>
+                    <td th:text="${webUsers.sexText}"></td>
+                </tr>
+                <tr>
+                    <td>用户头像:</td>
+                    <td><img th:src="@{${webUsers.avatar}}" th:width="66" th:height="66" alt="用户头像" /></td>
+                </tr>
+                <tr>
+                    <td>手机:</td>
+                    <td th:text="${webUsers.phone}"></td>
+                </tr>
+                <tr>
+                    <td>邮箱:</td>
+                    <td th:text="${webUsers.email}"></td>
+                </tr>
+                <tr>
+                    <td>地址:</td>
+                    <td th:text="${webUsers.address}"></td>
+                </tr>
+                <tr>
+                    <td>账户状态:</td>
+                    <td th:text="${webUsers.enableText}"></td>
+                </tr>
+                <tr>
+                    <td>创建日期:</td>
+                    <td th:text="${#dates.format(webUsers.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                </tr>
+                <tr>
+                    <td>最近登录IP:</td>
+                    <td th:text="${webUsers.ip}"></td>
+                </tr>
+                <tr>
+                    <td>最后登录日期:</td>
+                    <td th:text="${#dates.format(webUsers.loginAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                </tr>
+                <tr>
+                    <td>累计登录次数:</td>
+                    <td th:text="${webUsers.loginCount}"></td>
+                </tr>
+                <tr>
+                    <td>资料更新日期:</td>
+                    <td th:text="${#dates.format(webUsers.updatedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- 增值信息小表格 -->
+        <div th:if="${webUsersVipser != null}" class="layui-col-md12">
+            <table class="layui-table layui-table-sm">
+
+                <tbody>
+                <tr>
+                    <td>增值类型:</td>
+                    <td th:text="${webUsersVipser.incomeText}"></td>
+                </tr>
+                <tr>
+                    <td>增值状态:</td>
+                    <td th:text="${webUsersVipser.statusText}"></td>
+                </tr>
+                <tr>
+                    <td>增值有效期:</td>
+                    <td th:text="${#dates.format(webUsersVipser.startTime, 'yyyy-MM-dd') + ' 至 ' + #dates.format(webUsersVipser.endTime, 'yyyy-MM-dd')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+</script>
+<script>
+</script>
+</body>
+</html>

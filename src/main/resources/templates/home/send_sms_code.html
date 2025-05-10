@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+    <style>
+        .send-sms-form{
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-content: center;
+        }
+        .send-sms-form-row{
+            margin-bottom: 5px;
+        }
+        .captcha{
+            width: 100%;height: 50px;
+            cursor: pointer;
+        }
+        #tips{
+            font-size: 12px;
+            color: #6A6A6A;
+        }
+    </style>
+</head>
+<body>
+
+
+<form action="" class="layui-form send-sms-form"  method="post" onsubmit="return false">
+    <div class="layui-row send-sms-form-row">
+        <div class="layui-input-inline">
+            <input type="hidden" name="phone" th:value="${phone}">
+            <input type="hidden" name="stype" th:value="${stype}">
+            <input type="text" name="code" id="phone" required lay-verify="required" placeholder="请输入图片中的验证码" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-row send-sms-form-row">
+        <img src="/captcha" alt="验证码" onclick="this.src='/captcha?t='+Math.random()" class="captcha" id="captcha"></img>
+    </div>
+
+
+    <div class="layui-row send-sms-form-row">
+        <button class="layui-btn layui-btn-fluid layui-btn-normal" lay-submit lay-filter="sendSms">发送短信验证码</button>
+    </div>
+    <div class="layui-row send-sms-form-row">
+        <p id="tips">请输入图片中的字母信息~</p>
+    </div>
+</form>
+
+
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+<script type="application/javascript">
+    layui.use(['form'], function(){
+        var form = layui.form;
+        //监听提交
+        form.on('submit(sendSms)', function(data){
+            //提示输入验证码
+            if(!data.field.code){
+                layer.msg("请输入图片中的验证码！");
+                return false;
+            }
+            //如果手机号和stype不存在其中之一则提示无法提交
+            if(!data.field.phone){
+                layer.msg("请填写手机号！");
+                return false;
+            }
+            //缺少参数
+            if(!data.field.stype){
+                layer.msg("缺少参数！");
+                return false;
+            }
+            $.post("/send_code",data.field,function (res) {
+                if(res.status === 200){
+                    layer.msg("发送成功，请注意查收！");
+                    setTimeout(function () {
+                        //隐藏本页面
+                        parent.layer.closeAll();
+                        //控制父级按钮执行倒计时60秒
+                        parent.sendCode("sendBtn",60);
+                    },666);
+                }else{
+                    layer.msg(res.message);
+                    //刷新验证码
+                    $("#captcha").attr("src","/captcha?t="+Math.random());
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

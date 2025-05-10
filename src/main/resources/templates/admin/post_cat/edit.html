@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/css/other/form.css" />
+    <style>
+        .post-cat-icon-upload .post-cat-icon{
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="formBox">
+    <form action="" class="layui-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+                    <input type="hidden" name="id" th:value="${webPostCat.id}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">类型名称</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="name" th:value="${webPostCat.name}" placeholder="类型名称"
+                                   type="text">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">类型描述</label>
+                        <div class="layui-input-block">
+                            <textarea name="description" placeholder="类型描述"  class="layui-textarea" maxlength="255" th:text="${webPostCat.description}"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="formBoxBottom">
+            <div class="button-container">
+                <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="post-cat-save" lay-submit="" type="submit">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button class="layui-btn layui-btn-sm" type="reset">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+    layui.use(['form', 'jquery','upload'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let MODULE_PATH = "/admin/post_cat/";
+
+        form.on('submit(post-cat-save)', function (data) {
+            $.ajax({
+                url: MODULE_PATH+'update',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status==200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("PostCatTable", {
+                                where: {},
+                            });
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            })
+            return false;
+        });
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/css/other/form.css" />
+    <style>
+        .avatar-upload .avatar{
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="formBox">
+    <form action="" class="layui-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">用户权限：</label>
+                        <div class="layui-input-inline">
+                            <select name="ruleId" lay-verify="required" lay-search>
+                                <option value="">请选择用户权限</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item avatar-upload">
+                        <label class="layui-form-label">头像</label>
+                        <div class="layui-input-block">
+                            <div class="avatar-preview">
+                                <img class="avatar" id="avatar-preview" src="/default/avatar.jpg" alt="上传头像" />
+                            </div>
+                            <input id="avatar" name="avatar" type="hidden" value="/default/avatar.jpg"/>
+                            <div class="layui-form-mid layui-word-aux">点击头像即可上传图片,建议格式jpg|png,尺寸:200x200。</div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">用户名</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required|usernameFormat" name="username" placeholder="英文与数字组合~" type="text">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">密码</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required|passwordFormat" name="password" placeholder="尽量设置为复杂密码~" type="password">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-block">
+                            <input checked lay-filter="isEnable" name="enable" title="启用" type="radio" value="1">
+                            <input  lay-filter="isEnable" name="enable" title="禁用" type="radio" value="0">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="formBoxBottom">
+            <div class="button-container">
+                <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="admin-save" lay-submit="" type="submit">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button class="layui-btn layui-btn-sm" type="reset">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+    layui.use(['form', 'jquery',"upload"], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let MODULE_PATH = "/admin/sys_admin/";
+        let upload = layui.upload;
+
+        upload.render({
+            elem: '#avatar-preview', //绑定元素
+            url: '/upload', //上传接口
+            exts: 'gif|png|jpg',
+            done: function(res){
+                //上传完毕回调
+                console.log(res);
+                if (res.code === 0) {
+                    //清楚已有头像
+                    $('#avatar').val(res.data); // 将返回的图片链接保存到隐藏域
+                    $('#avatar-preview').attr('src', res.data); // 更新头像预览
+                } else {
+                    layer.msg(res.msg);
+                }
+            },
+            error: function(res){
+                //请求异常回调
+                layer.msg(res.msg);
+            }
+        });
+        // 发起ajax请求获取用户权限数据
+        $.get(MODULE_PATH+"select_rules", function(result) {
+            let select = $("select[name='ruleId']");
+            $.each(result.data, function(index, item) {
+                select.append("<option value='" + item.id + "'>" + item.name + "</option>");
+                console.log(item.id,item.name);
+            });
+            form.render('select');
+        });
+        form.verify({
+            usernameFormat: function(value) {
+                if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                    return '用户名只能包含英文和数字';
+                }
+            }
+            ,passwordFormat: function(value) {
+                if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                    return '密码只能包含英文和数字';
+                }
+            }
+        });
+        form.on('submit(admin-save)', function (data) {
+            $.ajax({
+                url: MODULE_PATH+'save',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status==200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("SysAdminTable", {
+                                where: {},
+                            });
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            })
+            return false;
+        });
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

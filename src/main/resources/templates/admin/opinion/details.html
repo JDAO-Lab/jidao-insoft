@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <style>
+    </style>
+</head>
+<body>
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <table class="layui-table layui-table-sm">
+                <tbody>
+                <tr>
+                    <td>反馈ID:</td>
+                    <td th:text="${opinion.id}"></td>
+                </tr>
+                <tr>
+                    <td>反馈URL:</td>
+                    <td th:text="${opinion.url}"></td>
+                </tr>
+                <tr>
+                    <td>反馈标题:</td>
+                    <td th:text="${opinion.title}"></td>
+                </tr>
+                <tr>
+                    <td>反馈内容:</td>
+                    <td th:text="${opinion.content}"></td>
+                </tr>
+                <tr>
+                    <td>反馈时间:</td>
+                    <td th:text="${#dates.format(opinion.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                </tr>
+                <tr>
+                    <td>反馈IP:</td>
+                    <td th:text="${opinion.ip}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+</script>
+<script>
+</script>
+</body>
+</html>

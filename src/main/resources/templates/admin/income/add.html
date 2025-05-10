@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/css/other/form.css" />
+    <style>
+        .income-icon-upload .income-icon{
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="formBox">
+    <form action="" class="layui-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+                    <div class="layui-form-item income-icon-upload">
+                        <label class="layui-form-label">图标</label>
+                        <div class="layui-input-block">
+                            <div class="income-icon-preview">
+                                <img class="income-icon" id="income-icon-preview" th:src="${'/default/upload.png'}" alt="上传图标" />
+                            </div>
+                            <input id="income-icon" name="icon" type="hidden" th:value="${''}"/>
+                            <div class="layui-form-mid layui-word-aux">点击图标即可上传图片,建议格式jpg|png,尺寸:100x100，非必填！</div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">服务名称</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="name" placeholder="服务名称"
+                                   type="text">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">服务描述</label>
+                        <div class="layui-input-block">
+                            <textarea name="description" placeholder="服务描述"  class="layui-textarea" maxlength="255"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">单价</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="price" placeholder="价格，单位元"
+                                   type="number">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">开通时效</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="duration" placeholder="单位：天，-1为永久"
+                                   type="number">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">折扣</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input"  name="discount" placeholder="单位：% ，最大为100%"
+                                   type="number">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">服务特权</label>
+                        <div class="layui-input-block">
+                            <textarea name="privilege" placeholder="服务特权，显示在定价界面中，价格下方的服务项目。单个以，号隔开，允许否在特权项后面加入:0或1即可标识。例子：二次开发授权:1,商用开发授权:1,二次授权资质:1,系统源代码:1,专属客服:1,是否永久有效:0"  class="layui-textarea" maxlength="255"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">排序</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="sort" placeholder="越小越靠前 ASC排序"
+                                   type="number" value="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="formBoxBottom">
+            <div class="button-container">
+                <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="income-save" lay-submit="" type="submit">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button class="layui-btn layui-btn-sm" type="reset">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+    layui.use(['form', 'jquery','upload'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let upload = layui.upload;
+        upload.render({
+            elem: '#income-icon-preview', //绑定元素
+            url: '/upload', //上传接口
+            exts: 'ico|png|jpg',
+            done: function(res){
+                //上传完毕回调
+                console.log(res);
+                if(res.code == 0){
+                    //do something （比如将res返回的图片链接保存到表单的隐藏域）
+                    $("#income-icon").val(res.data);
+                    $('#income-icon-preview').attr('src', res.data);
+                }
+                layer.msg(res.msg);
+            },
+            error: function(res){
+                //请求异常回调
+                layer.msg(res.msg);
+            }
+        });
+        let MODULE_PATH = "/admin/income/";
+
+        form.on('submit(income-save)', function (data) {
+            $.ajax({
+                url: MODULE_PATH+'save',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status==200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("IncomesTable", {
+                                where: {},
+                            });
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            })
+            return false;
+        });
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

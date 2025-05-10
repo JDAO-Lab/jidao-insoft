@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <link rel="stylesheet" href="/css/other/analysis.css" />
+    <style>
+        .num-card-panel{
+            border-radius: 5px;
+            text-align: center;
+        }
+        .num-card-panel .layui-card-header{
+            font-size: 25px;
+            line-height: 50px;
+            height: 50px;
+        }
+        .num-card-box{
+            background: #ffffff;
+            padding: 2px;
+            margin: 5px;
+        }
+        .number-card-tips{
+            font-size: 15px;
+            padding-left: 8px;
+            padding-top: 16px;
+            line-height: 30px;
+        }
+        .number-card{
+            color: #1f2228;
+            line-height: 60px;
+            font-size: 29px;
+            border-left: 1px solid #eceff9;
+        }
+    </style>
+</head>
+<body>
+<div class="pear-container">
+    <div class="layui-row layui-col-space8">
+        <!--今日数据-->
+        <div class="layui-col-xs6 layui-col-md3">
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-header">今日用户数据</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日新增
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTodayRegisterCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日付费
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTodayPayCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日活跃
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTodayActiveCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日购买率
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTodayBuyRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日活跃度
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTodayActiveRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--近7天-->
+        <div class="layui-col-xs6 layui-col-md3">
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-header">近7日用户数据</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日新增
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uSevenDayRegisterCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日付费
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uSevenDayPayCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日活跃
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uSevenDayActiveCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日购买率
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uSevenDayBuyRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日活跃度
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uSevenDayActiveRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--近1年-->
+        <div class="layui-col-xs6 layui-col-md3">
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-header">近30日用户数据</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日新增
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uThirtyDayRegisterCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日付费
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uThirtyDayPayCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日活跃
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uThirtyDayActiveCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日购买率
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uThirtyDayBuyRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日活跃度
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uThirtyDayActiveRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--历史累计-->
+        <div class="layui-col-xs6 layui-col-md3">
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-header">历史用户数据</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTotalRegisterCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计付费
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTotalPayCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计活跃
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTotalActiveCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计购买率
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTotalBuyRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计活跃度
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="uTotalActiveRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-row layui-col-space10" style="margin-top: 20px">
+        <blockquote class="layui-elem-quote">
+            <p>根据当前所有用户数据进行的实时数据信息的统计~</p>
+        </blockquote>
+    </div>
+</div>
+<script th:inline="javascript">
+    layui.use(['layer', 'count'], function () {
+        let $ = layui.jquery,
+            count = layui.count;
+        //今日数据输出
+        count.up("uTodayRegisterCount", {
+            time: 2000,
+            num: /*[[${todayRegisterCount}]]*/ 0,
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uTodayPayCount", {
+            time: 2000,
+            num: /*[[${todayPayCount}]]*/ 0,
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uTodayActiveCount", {
+            time: 3000,
+            num: /*[[${todayActiveCount}]]*/ 0,
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uTodayBuyRate", {
+            time: 3000,
+            bit: 2,
+            num: /*[[${todayBuyRate}]]*/ 0,
+            regulator: 50
+        });
+
+        count.up("uTodayActiveRate", {
+            time: 4000,
+            num: /*[[${todayActiveRate}]]*/ 0,
+            bit: 2,
+            regulator: 50
+        });
+        // 7日数据
+        count.up("uSevenDayRegisterCount", {
+            time: 2000,
+            num: /*[[${sevenDayRegisterCount}]]*/ 0, // 7日注册用户数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uSevenDayPayCount", {
+            time: 3000,
+            num: /*[[${sevenDayPayCount}]]*/ 0, // 7日付款订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uSevenDayActiveCount", {
+            time: 3000,
+            num: /*[[${sevenDayActiveCount}]]*/ 0, // 7日活跃人数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uSevenDayBuyRate", {
+            time: 6000,
+            bit: 2,
+            num: /*[[${sevenDayBuyRate}]]*/ 0, // 7日用户购买率
+            regulator: 50
+        });
+
+        count.up("uSevenDayActiveRate", {
+            time: 3000,
+            num: /*[[${sevenDayActiveRate}]]*/ 0, // 7日活跃率
+            bit: 2,
+            regulator: 50
+        });
+
+        // 30日数据
+        count.up("uThirtyDayRegisterCount", {
+            time: 3000,
+            num: /*[[${thirtyDayRegisterCount}]]*/ 0, // 30日注册用户数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uThirtyDayPayCount", {
+            time: 3000,
+            num: /*[[${thirtyDayPayCount}]]*/ 0, // 30日付款订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uThirtyDayActiveCount", {
+            time: 3000,
+            num: /*[[${thirtyDayActiveCount}]]*/ 0, // 30日活跃人数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uThirtyDayBuyRate", {
+            time: 3000,
+            bit: 2,
+            num: /*[[${thirtyDayBuyRate}]]*/ 0, // 30日用户购买率
+            regulator: 50
+        });
+
+        count.up("uThirtyDayActiveRate", {
+            time: 3000,
+            num: /*[[${thirtyDayActiveRate}]]*/ 0, // 30日活跃率
+            bit: 2,
+            regulator: 50
+        });
+
+        // 累计数据
+        count.up("uTotalRegisterCount", {
+            time: 1000,
+            num: /*[[${totalRegisterCount}]]*/ 0, // 累计注册用户数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uTotalPayCount", {
+            time: 1000,
+            num: /*[[${totalPayCount}]]*/ 0, // 累计付款订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uTotalActiveCount", {
+            time: 2000,
+            num: /*[[${totalActiveCount}]]*/ 0, // 累计活跃人数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("uTotalBuyRate", {
+            time: 2000,
+            bit: 2,
+            num: /*[[${totalBuyRate}]]*/ 0, // 累计用户购买率
+            regulator: 50
+        });
+
+        count.up("uTotalActiveRate", {
+            time: 3000,
+            num: /*[[${totalActiveRate}]]*/ 0, // 30日活跃率
+            bit: 2,
+            regulator: 50
+        });
+    });
+</script>
+
+</body>
+
+</html>

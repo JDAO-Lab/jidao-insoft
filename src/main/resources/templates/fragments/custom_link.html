@@ -1,0 +1,30 @@
+<!-- fragments/custom_link.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:fragment="custom-js">
+        <script src="/js/common.js"></script>
+    </th:block>
+    <th:block th:fragment="pear-js">
+        <script src="/libs/layui/layui.js"></script>
+        <script src="/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="/libs/pear/pear.js"></script>
+    </th:block>
+    <th:block th:fragment="home-css">
+        <link rel="stylesheet" href="/libs/layui/css/layui.css" />
+        <link rel="stylesheet" href="/css/home.css" />
+    </th:block>
+    <th:block th:fragment="home-js">
+        <script src="/libs/layui/layui.js"></script>
+        <script src="/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="/js/common.js"></script>
+    </th:block>
+    <th:block th:fragment="pear-css">
+        <link rel="stylesheet" href="/libs/pear/css/pear.css" />
+        <link rel="stylesheet" href="/css/admin.css" />
+        <link rel="stylesheet" href="/css/admin.dark.css" />
+        <link rel="stylesheet" href="/css/variables.css" />
+        <link rel="stylesheet" href="/css/reset.css" />
+    </th:block>
+</head>
+</html>

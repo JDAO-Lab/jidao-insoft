@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+</head>
+<body>
+<div style="padding: 16px;">
+    <div class="layui-card">
+        <th:block th:replace="fragments/custom_table::commonTitle"></th:block>
+        <div class="layui-card-body">
+            <div class="layui-row" style="margin-top: 10px">
+                <form class="layui-form layui-row layui-col-space16">
+                    <div class="layui-col-sm3">
+                        <div class="layui-input-wrap">
+                            <select name="cid" id="NavCatSelect" lay-filter="NavCatSelect">
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <table class="layui-hide" id="NavTable" lay-filter="NavTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="NavTableToolBar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">
+            <i class="layui-icon layui-icon-add-1"></i>新增
+        </button>
+        <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="delBatch">
+            批量删除
+        </button>
+    </div>
+</script>
+
+<script id="NavTableBar" type="text/html">
+<!--    编辑-->
+    <button class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
+<!--删除-->
+    <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+</script>
+<script id="NavEnablePanel" type="text/html">
+<!--    状态开关-->
+    <input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用"
+           lay-filter="NavEnable" {{ d.enable== true ? 'checked' : '' }}>
+</script>
+
+<script th:inline="javascript">
+    $(function () {
+        // 全局变量
+        let initConfig = {
+            "tableName": "NavTable",
+            "toolBarName": "NavTableToolBar",
+            "tableCols": [
+                [
+                    {type: 'checkbox'},
+                    {field: "id", width: 80, title: "ID", sort: true},
+                    {field: "name", width: 158, title: "导航名称"},
+                    {field: "keywords", width: 180, title: "关键词"},
+                    {field: "description", width: 180, title: "导航描述"},
+                    {field: "typeText", width: 100, title: "类型"},
+                    {field: "enableText", width: 150, title: "状态", templet: "#NavEnablePanel"},
+                    {field: "sort", width: 120, title: "排序", sort: true, edit: 'input'},
+                    {field: "createdAt", title: "创建日期", width: 160},
+                    {field: "updatedAt", width: 160, title: "更新日期", sort: true},
+                    {title: '操作', templet: '#NavTableBar', width: 200, align: 'center'}
+                ]
+            ],
+            "menuDesc": /*[[${menu_desc}]]*/ ""
+        };
+        // 引入layui模块
+        layui.use(["table", "treetable", "dropdown", "form", "popup"], function () {
+            let table = layui.table;
+            let popup = layui.popup;
+            let form = layui.form;
+            let MODULE_PATH = "/admin/nav/";
+            let treetable = layui.treetable;
+            let tableCols = initConfig.tableCols;
+            let menuDesc = initConfig.menuDesc;
+            let tableName = initConfig.tableName;
+            let toolBarName = initConfig.toolBarName;
+            let cid = /*[[${cid}]]*/ 0;
+            // 加载分类
+            getSelect(MODULE_PATH + "select", 'NavCatSelect', cid, function () {
+                form.render("select");
+            }, function () {
+                popup.failure('加载分类失败，请检查网络');
+            });
+
+            // 监听select事件，重新渲染界面
+            form.on('select(NavCatSelect)', function (data) {
+                cid = data.value;
+                renderTreeTable(cid);
+            });
+
+            renderTreeTable(cid); // 初始渲染
+
+            // 监听表格内事件
+            table.on('tool(' + tableName + ')', function (obj) {
+                switch (obj.event) {
+                    case 'remove':
+                        remove(obj);
+                        break;
+                    case 'edit':
+                        edit(obj);
+                        break;
+                    case 'recovery':
+                        recovery(obj);
+                        break;
+                }
+            });
+
+            // 排序修改
+            table.on('edit(' + tableName + ')', function (obj) {
+                let field = obj.field;
+                let value = obj.value;
+                let data = obj.data;
+                if (data.sort !== null && data.sort !== '' && data.id !== 0) {
+                    updateSort(data.id, data.sort);
+                    let update = {};
+                    update[field] = value;
+                    obj.update(update);
+                } else {
+                    popup.failure("参数不能为空！");
+                }
+            });
+
+            // 工具栏事件
+            table.on("toolbar(" + tableName + ")", function (obj) {
+                switch (obj.event) {
+                    case "add":
+                        add();
+                        break;
+                    case "delBatch":
+                        removeBatch();
+                        break;
+                    case "refresh":
+                        refresh();
+                        break;
+                    case "LAYTABLE_TIPS":
+                        layer.alert(menuDesc);
+                        break;
+                };
+            });
+
+            // 开关事件
+            form.on('switch(NavEnable)', function (obj) {
+                let operate = obj.elem.checked ? "enable" : "disable";
+                switchEnable(obj.value, operate);
+            });
+
+            // 初始化和更新树状表格
+            function renderTreeTable(cid) {
+                treetable.render({
+                    treeColIndex: 1,
+                    treeSpid: 0,
+                    treeIdName: 'id',
+                    treePidName: 'pid',
+                    skin: 'line',
+                    method: 'get',
+                    treeDefaultClose: false,
+                    toolbar: '#' + toolBarName,
+                    elem: '#' + tableName,
+                    url: MODULE_PATH + 'data',
+                    page: false,
+                    where: { cid: cid },
+                    defaultToolbar: [
+                        { layEvent: 'refresh', icon: 'layui-icon-refresh', title: '刷新' },
+                        'filter', 'print', 'exports',
+                        { title: "本页描述", layEvent: "LAYTABLE_TIPS", icon: "layui-icon-tips" }
+                    ],
+                    cols: tableCols
+                });
+            }
+
+            //监听表单提交并刷新页面
+            form.on('submit(NavChildRefresh)', function (data) {
+                refresh();
+            });
+
+            // 刷新
+            let refresh = function () {
+                // treetable.reload('#' + tableName);
+                renderTreeTable(cid);
+                getSelect(MODULE_PATH + "select", 'NavCatSelect', cid, function () {
+                    console.log('分类加载成功');
+                }, function () {
+                    popup.failure('加载分类失败，请检查网络');
+                });
+            }
+
+            // 新增
+            let add = function () {
+                openLayer('新增', MODULE_PATH + 'add' + '?cid=' + cid);
+            }
+
+            // 编辑
+            let edit = function (obj) {
+                openLayer('修改', MODULE_PATH + 'edit?id=' + obj.data['id'] + '&cid=' + cid);
+            }
+
+            // 删除
+            let remove = function (obj) {
+                layer.confirm('确定要删除该导航', { icon: 3, title: '提示' }, function (index) {
+                    layer.close(index);
+                    deleteItem(obj.data['id']);
+                });
+            }
+
+            // 批量删除
+            let removeBatch = function () {
+                let ids = getSelectedIds();
+                if (ids.length > 0) {
+                    layer.confirm('确定要删除选中的数据吗？', function (index) {
+                        deleteBatch(ids);
+                        layer.close(index);
+                    });
+                } else {
+                    popup.warning("请选择要操作的数据");
+                }
+            }
+
+            // 获取选中项的id数组
+            function getSelectedIds() {
+                let checkStatus = table.checkStatus(tableName);
+                return checkStatus.data.map(function (item) {
+                    return item.id;
+                });
+            }
+
+            // 异步更新排序
+            function updateSort(id, sort) {
+                let loading = layer.load();
+                $.ajax({
+                    url: MODULE_PATH + "sort",
+                    data: JSON.stringify({ id: id, sort: sort }),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'put',
+                    success: function (result) {
+                        layer.close(loading);
+                        if (result.status == 200) {
+                            popup.success(result.message);
+                        } else {
+                            popup.failure(result.message);
+                        }
+                    }
+                });
+            }
+
+            // 异步操作启用/禁用
+            function switchEnable(id, operate) {
+                let loading = layer.load();
+                $.ajax({
+                    url: MODULE_PATH + operate,
+                    data: JSON.stringify({ id: id }),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'put',
+                    success: function (result) {
+                        layer.close(loading);
+                        if (result.status == 200) {
+                            popup.success(result.message);
+                        } else {
+                            popup.failure(result.message);
+                        }
+                    }
+                });
+            }
+
+            // 异步删除单个项目
+            function deleteItem(id) {
+                let loading = layer.load();
+                $.ajax({
+                    url: MODULE_PATH + "remove/" + id,
+                    dataType: 'json',
+                    type: 'delete',
+                    success: function (result) {
+                        layer.close(loading);
+                        if (result.status == 200) {
+                            popup.success(result.message, function () {
+                                refresh();
+                            })
+                        } else {
+                            popup.failure(result.message);
+                        }
+                    }
+                });
+            }
+
+            // 异步批量删除
+            function deleteBatch(ids) {
+                let loading = layer.load();
+                $.ajax({
+                    url: MODULE_PATH + "remove_batch",
+                    type: 'delete',
+                    data: JSON.stringify(ids),
+                    contentType: 'application/json',
+                    success: function (result) {
+                        layer.close(loading);
+                        if (result.status == 200) {
+                            popup.success(result.message);
+                            refresh();
+                        } else {
+                            popup.failure(result.message);
+                        }
+                    }
+                });
+            }
+
+            // 打开弹窗
+            function openLayer(title, content) {
+                layer.open({
+                    type: 2,
+                    title: title,
+                    shade: 0.1,
+                    area: ['1080px', '600px'],
+                    content: content
+                });
+            }
+
+        });
+    })
+</script>
+</body>
+</html>

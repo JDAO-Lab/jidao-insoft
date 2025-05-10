@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/css/other/form.css" />
+    <style>
+        .avatar-upload .avatar{
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="formBox">
+    <form action="" class="layui-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+                    <input type="hidden" name="id" th:value="${sysAdmin.id}">
+                    <input type="hidden" name="ruleId" th:value="${sysAdmin.ruleId}">
+                    <div class="layui-form-item avatar-upload">
+                        <label class="layui-form-label">头像</label>
+                        <div class="layui-input-block">
+                            <div class="avatar-preview">
+                                <img class="avatar" id="avatar-preview" th:src="${sysAdmin.avatar?:'/default/avatar.jpg'}" alt="上传头像" />
+                            </div>
+                            <input id="avatar" name="avatar" type="hidden" th:value="${sysAdmin.avatar?:'/default/avatar.jpg'}"/>
+                            <div class="layui-form-mid layui-word-aux">点击头像即可上传图片,建议格式jpg|png,尺寸:200x200。</div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">密码</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="passwordFormat" name="password" placeholder="留空则不修改~" type="password" >
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="formBoxBottom">
+            <div class="button-container">
+                <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="profile-update" lay-submit="" type="submit">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button class="layui-btn layui-btn-sm" type="reset">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+    layui.use(['form', 'jquery',"upload"], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let MODULE_PATH = "/admin/sys_admin/";
+        let upload = layui.upload;
+
+        upload.render({
+            elem: '#avatar-preview', //绑定元素
+            url: '/upload', //上传接口
+            exts: 'gif|png|jpg',
+            done: function(res){
+                //上传完毕回调
+                console.log(res);
+                if (res.code === 0) {
+                    //清楚已有头像
+                    $('#avatar').val(res.data); // 将返回的图片链接保存到隐藏域
+                    $('#avatar-preview').attr('src', res.data); // 更新头像预览
+                } else {
+                    layer.msg(res.msg);
+                }
+            },
+            error: function(res){
+                //请求异常回调
+                layer.msg(res.msg);
+            }
+        });
+        form.verify({
+            passwordFormat: function(value) {
+                if (value!==""){
+                    if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                        return '密码只能包含英文和数字';
+                    }
+                }
+            }
+        });
+        form.on('submit(profile-update)', function (data) {
+            $.ajax({
+                url: MODULE_PATH+'update',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status==200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            })
+            return false;
+        });
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

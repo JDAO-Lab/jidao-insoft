@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <!-- 引入css_link.html模板内容 -->
+    <script src="/libs/layui/layui.js"></script>
+    <script src="/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/libs/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="/css/admin.css" media="all">
+    <style>
+    </style>
+</head>
+<body class="login-bg">
+<div class="login">
+    <div class="login-title">管理中心</div>
+    <form onsubmit="return false;" class="layui-form" >
+        <input name="username" placeholder="用户名"  type="text" lay-verify="required" class="layui-input" autocomplete="off">
+        <hr class="hr15 login-hr">
+        <input name="password" lay-verify="required" placeholder="密码"  type="password" class="layui-input" autocomplete="off">
+        <hr class="hr15 login-hr">
+        <input type="checkbox" name="remember" lay-skin="primary" title="长期保持登录" value="1">
+        <hr class="hr15 login-hr">
+        <input value="登录" lay-submit="" lay-filter="login" id="loginIn" class="login-btn" type="button">
+        <hr class="hr20 login-hr" >
+    </form>
+</div>
+
+<div class="login-footer">
+    <th:block th:replace="fragments/custom_base::copyrightText"></th:block>
+</div>
+
+<script>
+    $(function  () {
+        layui.use('form', function(){
+            var form = layui.form;
+
+            form.on('submit(login)', function(data){
+                var loading = layer.load(2, {
+                    shade: [0.5, '#000'], // 加载框背景色和透明度
+                    area: ['100px', '100px'] // 加载框大小
+                });
+                $.post("/admin/login", data.field, function (result) {
+                    layer.close(loading);
+                    if (result.status==200){
+                        window.location.href = "/admin";//跳转到激活界面，提示邮箱发送的卡片
+                    }else{
+                        layer.msg(result.message);
+                    }
+                })
+            });
+        });
+        // 监听键盘事件
+        $(document).keydown(function(event) {
+            if (event.keyCode === 13 && event.target.nodeName !== "TEXTAREA") { // 键盘码 13 代表 Enter 键
+                event.preventDefault(); // 阻止表单的默认提交行为
+                $("#loginIn").trigger('click'); // 触发表单的提交事件
+            }
+        });
+    })
+</script>
+<!-- 底部结束 -->
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+    <style>
+        .time-tips-p {
+            text-align: left;
+            line-height: 25px;
+            background: #efefef;
+            padding: 5px 20px;
+        }
+        .password-strength {
+            margin-top: 10px;
+            display: none;
+            color: #777;
+        }
+        .password-mismatch {
+            margin-top: 10px;
+            display: none;
+            color: #ff0000;
+        }
+        .vaild-tips-p{
+            text-align: right;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md-offset2 layui-col-sm-offset2 layui-col-md8 layui-col-sm8">
+            <div class="layui-col-md3 layui-col-sm3">
+                <th:block th:replace="fragments/custom_base::userCenterMenu"></th:block>
+            </div>
+            <div class="layui-col-md9 layui-col-sm9">
+                <div class="user-center-content">
+                    <div class="user-center-content-title">[[${title}]]</div>
+                    <div class="user-center-content-body">
+                        <form class="layui-form" action="" method="post">
+
+                            <div class="layui-form-item">
+                                <p class="time-tips-p">
+                                    小提示：您可以通过定期更换密码，以此保护您的账号安全，在使用此功能前，您需要输入旧密码进行验证。
+                                </p>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">旧密码：</label>
+                                <div class="layui-input-block">
+                                    <input type="password" name="oldpwd" required lay-verify="required" placeholder="用于修改密码验证，如忘记密码请先找回再尝试设置" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">新密码：</label>
+                                <div class="layui-input-block">
+                                    <input type="password" name="newpwd" required lay-verify="required" placeholder="请设置包含符号及大小写数字的高强度密码。" autocomplete="off" class="layui-input" oninput="updatePasswordStrength(this.value)">
+                                    <div class="vaild-tips-p">
+                                        <p class="password-strength" id="password-strength"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">确认密码：</label>
+                                <div class="layui-input-block">
+                                    <input type="password" name="confirm_newpwd" required lay-verify="required" placeholder="请再次输入您的密码。" autocomplete="off" class="layui-input" oninput="checkPasswordMatch()">
+                                    <div class="vaild-tips-p">
+                                        <p class="password-mismatch" id="password-mismatch"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button class="layui-btn" lay-submit lay-filter="changePwd">确认修改</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+<script type="application/javascript">
+    layui.use(['form'], function(){
+        var form = layui.form;
+        //监听提交
+        form.on('submit(changePwd)', function(data){
+            if (!checkPasswordMatch()) {
+                return false; // 阻止表单提交
+            }
+            // 提交表单的逻辑 ajax
+            $.ajax({
+                url: '/users/change_pwd_request',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status == 200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            //刷新页面
+                            window.location.reload();
+                        })
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000})
+                    }
+                }
+            })
+            return false;
+        });
+    });
+
+    function updatePasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/\d/.test(password)) strength++;
+        if (/[\W_]/.test(password)) strength++;
+
+        const strengthText = document.getElementById('password-strength');
+        switch (strength) {
+            case 0:
+                strengthText.textContent = '弱';
+                strengthText.style.color = '#ff0000';
+                break;
+            case 1:
+                strengthText.textContent = '较弱';
+                strengthText.style.color = '#ff8c00';
+                break;
+            case 2:
+                strengthText.textContent = '中等';
+                strengthText.style.color = '#ffff00';
+                break;
+            case 3:
+                strengthText.textContent = '较强';
+                strengthText.style.color = '#00ff00';
+                break;
+            case 4:
+                strengthText.textContent = '强';
+                strengthText.style.color = '#008000';
+                break;
+            default:
+                strengthText.textContent = '';
+        }
+        strengthText.style.display = "block";
+    }
+
+    function checkPasswordMatch() {
+        const newPwd = document.getElementsByName('newpwd')[0].value;
+        const confirmNewPwd = document.getElementsByName('confirm_newpwd')[0].value;
+        const mismatchText = document.getElementById('password-mismatch');
+        mismatchText.style.display = "block";
+        if (newPwd === confirmNewPwd) {
+            mismatchText.style.color = '#008000';
+            mismatchText.textContent = '两次密码一致';
+            return true;
+        } else {
+            mismatchText.style.color = '#ff0000';
+            mismatchText.textContent = '两次密码不一致';
+            return false;
+        }
+    }
+</script>
+</html>

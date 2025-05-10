@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+
+
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md-offset3 layui-col-sm-offset3 layui-col-md6 layui-col-sm6">
+            <div class="custom-form">
+                <div class="title">
+                    <h2> 提交建议 </h2>
+                </div>
+                <div class="custom-form-body">
+                    <form class="layui-form" action="" method="post">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">概括：</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="title" required lay-verify="required" placeholder="30个字左右的简单描述~" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">描述：</label>
+                            <div class="layui-input-block">
+                                <textarea name="content" required lay-verify="required" placeholder="详细的问题描述和你所希望的样子~"  class="layui-textarea" style="width: 90%;"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">路径：</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="url" required lay-verify="required" placeholder="您所需要反馈的目标界面，此处填写url路径~" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">验证码：</label>
+                            <div class="layui-input-block verify">
+                                <input type="text" name="code" required lay-verify="required" placeholder="" autocomplete="off" class="layui-input verify-input">
+                                <img src="/captcha" alt="验证码" onclick="this.src='/captcha?time='+new Date().getTime()" style="width: 150px;height: 40px;cursor: pointer;">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-submit lay-filter="saveFeed">确认提交</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+<script type="application/javascript">
+    layui.use(['form'], function(){
+        var form = layui.form; //获取form模块
+        //监听提交
+        form.on('submit(saveFeed)', function(data){
+            //执行登录请求的逻辑，这里只是一个示例
+            console.log(data.field); //当前容器的全部表单字段，键值对形式：{name: value}
+            $.post("/saveFeed", data.field, function (res) {
+                if (res.status==200){
+                    //弹出消息框 等待消息框完毕后进行跳转
+                    ccMsg(res.message);
+                    ccJumper("/",1);
+                }else {
+                    ccMsg(res.message,2);
+                }
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+    });
+</script>
+</html>

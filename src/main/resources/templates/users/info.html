@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+    <style>
+
+    </style>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md-offset2 layui-col-sm-offset2 layui-col-md8 layui-col-sm8">
+
+            <div class="layui-col-md3 layui-col-sm3">
+                <th:block th:replace="fragments/custom_base::userCenterMenu"></th:block>
+            </div>
+            <div class="layui-col-md9 layui-col-sm9">
+                <div class="user-center-content">
+                    <div class="user-center-content-title">[[${title}]]</div>
+                    <div class="user-center-content-body">
+                        <!--渲染用户信息-->
+                        <div class="vip-info-card">
+                            <div class="vip-info-card-left">
+                                <img th:src="${userInfo.avatar?:'/default/avatar.jpg'}" alt="会员头像" class="vip-info-avatar">
+                            </div>
+                            <div class="vip-info-card-right">
+                                <p>
+                                    [[${userInfo.username}]] (ID:<span th:text="${userInfo.id}" style="color: red"></span>)
+                                </p>
+                                <p>
+                                    类型：<span th:text="${vipType}">--</span> <a href="/price" class="vip-price-link">[升级会员]</a>
+                                </p>
+                                <p>
+                                    到期：<span th:text="${endDate!=null?#dates.format(endDate, 'yyyy-MM-dd'):'永久'}">2034年10月6日</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!--渲染特权情况-->
+                        <div class="vip-server-box">
+                            <div class="vip-server-title">会员特权：</div>
+                            <div class="vip-server-content">
+                                <th:block th:each="privilege : ${privilegeList}">
+                                    <div class="vip-server-item" th:classappend="${privilege.allow == '1' ?'ok':''}">
+                                        <i class="layui-icon" th:classappend="${privilege.allow == '1' ?'layui-icon-ok':'layui-icon-close'}"></i>
+                                        [[${privilege.name}]]
+                                    </div>
+                                </th:block>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+<script type="application/javascript">
+
+</script>
+</html>

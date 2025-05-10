@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="pan-tbox">
+                <h2 class="pan-title">帮助</h2>
+                <p class="pan-desc">
+                    您可以检索和查询相应文档，以解决您的问题~
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-md8 layui-col-md-offset2">
+
+
+            <th:block th:replace="fragments/custom_base::commonSearch"></th:block>
+
+
+            <div th:each="helpCard : ${helpCardList}" class="layui-card">
+                <div class="layui-card-header">
+                    <h2 th:text="${helpCard.webPostCatName}">常见问题</h2>
+                </div>
+                <div class="layui-card-body">
+                    <div class="article-list">
+                        <a th:href="@{/article(postId=${post.id})}" th:each="post : ${helpCard.webPostList}" class="article-item">
+                            <div class="article-title" th:text="${post.title}">文章标题</div>
+                            <div class="article-info">
+                                <span th:text="${#dates.format(post.createdAt, 'yyyy-MM-dd hh:mm:ss')}">2023-08-01</span>
+                                <i class="layui-icon layui-icon-right"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <th:block th:replace="fragments/custom_base::commonFeedback"></th:block>
+        </div>
+    </div>
+</div>
+
+
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+</html>

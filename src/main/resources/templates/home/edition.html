@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+    <style>
+        .downPwd{
+            font-size: 12px;
+            display: inline-block;
+            padding: 5px;
+            background: #efe;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="pan-tbox">
+                <h2 class="pan-title">下载</h2>
+                <p class="pan-desc">
+                    点击下方客户端版本下载，即可安装对应版本。
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-md10 layui-col-md-offset1">
+
+
+            <th:block th:each="verCard : ${verCardList}">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        <h2 th:text="${verCard.appCatName}">Win客户端</h2>
+                    </div>
+                    <div class="layui-card-body">
+                        <table class="layui-table">
+                            <thead>
+                            <tr>
+                                <th>版本名称</th>
+                                <th>更新说明</th>
+                                <th>更新日期</th>
+                                <th>下载</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="version : ${verCard.versionList}">
+                                <td style="width: 100px;" th:text="'v'+${version.version}">v1.0.0</td>
+                                <td style="width: 300px;" th:text="${version.upLog}">1、修复了搜索结果为空时，没有提示的问题。<br>2、修复了搜索结果为空时，没有提示的问题。</td>
+                                <td style="width: 150px;" th:text="${#dates.format(version.createdAt, 'yyyy-MM-dd hh:mm:ss')}">2023-08-01</td>
+                                <td style="width: 100px;">
+                                    <a th:href="@{${version.downUrl}}" class="layui-btn layui-btn-sm layui-btn-fluid" >
+                                        <span th:text="${version.downTypeText}">下载</span>
+                                        <i class="layui-icon layui-icon-download-circle"></i>
+                                    </a>
+                                    <span th:if="${version.downPwd} != ''" class="downPwd">提取码：<span th:text="${version.downPwd}">123456</span></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </th:block>
+
+        </div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="tips-bar">
+                我们已经上线了多个客户端版本，您可以按需进行下载安装使用~
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+</html>

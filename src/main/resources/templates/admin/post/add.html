@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/css/other/form.css" />
+    <link rel="stylesheet" href="/libs/editor/css/editormd.min.css" />
+    <style>
+    </style>
+</head>
+<body>
+<div class="formBox">
+    <form action="" class="layui-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">图文类型</label>
+                        <div class="layui-input-block">
+                            <select name="cid" id="postCatSelect" lay-filter="postCatSelect" lay-verify="required">
+                                <option value="0">请选择</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item" >
+                        <label class="layui-form-label">图文标题</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" lay-verify="required" class="layui-input"  name="title" placeholder="图文标题信息，建议在50个字左右~"
+                                   type="text">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item" >
+                        <label class="layui-form-label">关键词</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" lay-verify="required" class="layui-input"  name="keywords" placeholder="用于seo展示的关键词信息，多个以，号隔开。"
+                                   type="text">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item" >
+                        <label class="layui-form-label">描述信息</label>
+                        <div class="layui-input-block">
+                            <textarea name="description" placeholder="用于seo使用的描述信息，不超过200字！"  class="layui-textarea" maxlength="255" lay-verify="required"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item" id="menuContent">
+                        <label class="layui-form-label">图文内容</label>
+                        <div class="layui-input-block">
+                            <div id="markdownEditor"><textarea style="display:none;" ></textarea></div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">阅读数</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input"  name="views" placeholder="虚拟阅读数设置，可以设置指定数目的阅读量~" value="100" lay-verify="required"
+                                   type="number">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="formBoxBottom">
+            <div class="button-container">
+                <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="post-save" lay-submit="" type="submit">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button class="layui-btn layui-btn-sm" type="reset">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<th:block th:replace="fragments/custom_link::custom-js"></th:block>
+<script src="/libs/editor/editormd.min.js"></script>
+
+<script th:inline="javascript">
+    layui.use(['form', 'jquery','popup'], function () {
+        let editor = editormd("markdownEditor", {
+            width: "100%",
+            height: 500,
+            path : "/libs/editor/lib/",
+            // 图片上传配置
+            imageUpload: true,          // 开启图片上传功能
+            imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],  // 支持的图片格式
+            imageUploadURL: "/editor_upload",  // 图片上传的服务器地址
+            pasteImage: true,
+            catchRemoteImageEnable:true,//抓取远程图片
+            onload: function () {
+                initPasteDragImg(this); //必须
+            }
+        });
+        let form = layui.form;
+        let $ = layui.jquery;
+        let popup = layui.popup;
+        let MODULE_PATH = "/admin/post/";
+        //加载select
+        getSelect(MODULE_PATH+"select", 'postCatSelect',0, function() {
+            console.log('加载成功');
+            form.render("select");
+        }, function() {
+            popup.failure('加载失败，请检查网络');
+        });
+        form.on('submit(post-save)', function (data) {
+            data.field.content = editor.getMarkdown();
+            $.ajax({
+                url: MODULE_PATH+'save',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status==200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("WebPostTable", {
+                                where: {},
+                            });
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            })
+            return false;
+        });
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

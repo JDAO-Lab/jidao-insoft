@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+</head>
+<body>
+<div style="padding: 16px;">
+    <div class="layui-card">
+        <th:block th:replace="fragments/custom_table::commonTitle"></th:block>
+        <div class="layui-card-body">
+            <table class="layui-hide" id="SysMenusTable" lay-filter="SysMenusTable"></table>
+        </div>
+    </div>
+</div>
+
+<script id="SysMenusTableBar" type="text/html">
+    <button
+            class="layui-btn layui-btn-primary layui-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>
+    </button>
+    <button
+            class="layui-btn layui-btn-danger layui-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i>
+    </button>
+</script>
+
+<script id="SysMenusEnable" type="text/html">
+    <input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用"
+           lay-filter="SysMenusEnable" {{ d.enable== true ? 'checked' : '' }}>
+</script>
+
+<script id="icon" type="text/html">
+    <i class="layui-icon {{d.icon}}"></i>
+</script>
+
+<script type="text/html" id="SysMenusTableToolBar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">
+            <i class="layui-icon layui-icon-add-1"></i>新增
+        </button>
+        <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="delBatch">
+            批量删除
+        </button>
+    </div>
+    <div class="layui-row" style="margin-top: 10px">
+        <form class="layui-form layui-row layui-col-space16">
+            <div class="layui-col-sm3">
+                <input type="text" name="keyword" placeholder="请输入文本信息，点击检索即可查询！" lay-affix="clear" class="layui-input">
+            </div>
+            <div class="layui-btn-container layui-col-sm3">
+                <button class="layui-btn layui-btn-sm" lay-submit lay-filter="searchFormSysMenus">检索</button>
+                <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary">重置</button>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script th:inline="javascript">
+    $(function () {
+        //初始化配置信息
+        let initConfig = {
+            //请求路径
+            "tableName":"SysMenusTable",
+            //此处工具栏要配置名称正确，否则不会显示
+            "toolBarName":"SysMenusTableToolBar",
+            "searchFormName":"searchFormSysMenus",
+            //设置表头
+            "tableCols": [
+                [
+                    {type: 'checkbox'},
+                    {field: 'id', Width: 100, title: 'ID',"sort":true},
+                    {field: 'icon', title: '图标',Width: 60, templet: '#icon'},
+                    {field: 'title', title: '菜单名称',Width: 250},
+                    {field: 'href', title: '菜单路径',Width: 350},
+                    {field: 'hideText', title: '显示状态',Width: 100},
+                    {field: 'enable', title: '是否可用', templet: '#SysMenusEnable'},
+                    {field: 'allowText', title: '验证状态',Width: 100},
+                    {field: 'sort', title: '排序',edit: 'input', minWidth: 90, expandedWidth: 100,"sort":true},
+                    {title: '操作', templet: '#SysMenusTableBar', width: 150, align: 'center'}
+                ]
+            ],
+            "menuDesc": /*[[${menu_desc}]]*/ ""
+        };
+        //初始化表单信息
+        layui.use(['table', 'form', 'jquery', 'treetable', 'popup'], function () {
+            let table = layui.table;
+            let form = layui.form;
+            let $ = layui.jquery;
+            let treetable = layui.treetable;
+            let popup = layui.popup;
+
+            let MODULE_PATH = "/admin/menus/";
+            let tableCols= initConfig.tableCols;//每页表头
+            let menuDesc= initConfig.menuDesc;//每页描述
+            let tableName = initConfig.tableName;//表格名 每页都不用
+            let toolBarName = initConfig.toolBarName;//滚动条名 每页都不同
+            let searchFormName = initConfig.searchFormName;//搜索表单名 每页都不同
+            treetable.render({
+                treeColIndex: 1,
+                treeSpid: 0,
+                treeIdName: 'id',
+                treePidName: 'pid',
+                skin: 'line',
+                method: 'get',
+                treeDefaultClose: false,
+                toolbar: '#'+toolBarName,
+                elem: '#'+tableName,
+                url: MODULE_PATH+'data',
+                page: false,
+                defaultToolbar: [{
+                    layEvent: 'refresh',
+                    icon: 'layui-icon-refresh',
+                    title: '刷新'
+                },'filter', 'print', 'exports',{
+                    title: "本页描述",
+                    layEvent: "LAYTABLE_TIPS",
+                    icon: "layui-icon-tips"
+                }],
+                cols:tableCols
+            });
+
+            table.on('edit('+tableName+')', function (obj) {
+                let field = obj.field; // 得到字段
+                let value = obj.value; // 得到修改后的值
+                let data = obj.data; // 得到所在行所有键值
+                console.log("排序数据：",data.id,data.sort);
+                if (data.sort!==null&&data.sort!==''&&data.id!==0){
+                    // 其他更新操作
+                    let loading = layer.load();
+                    $.ajax({
+                        url: MODULE_PATH + "sort",
+                        data: JSON.stringify({id: data.id,sort:data.sort}),
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        type: 'put',
+                        success: function (result) {
+                            layer.close(loading);
+                            if (result.status==200) {
+                                popup.success(result.message);
+                            } else {
+                                popup.failure(result.message);
+                            }
+                        }
+                    })
+                    let update = {};
+                    update[field] = value;
+                    obj.update(update);
+                }else {
+                    popup.failure("参数不能为空！");
+                }
+            });
+
+            //条内事件
+            table.on('tool('+tableName+')', function (obj) {
+                if (obj.event === 'remove') {
+                    remove(obj);
+                } else if (obj.event === 'edit') {
+                    edit(obj);
+                }
+            })
+
+            // 工具栏事件
+            table.on("toolbar("+tableName+")", function (obj) {
+                switch (obj.event) {
+                    case "add":
+                        add();
+                        break;
+                    case "delBatch":
+                        removeBatch();
+                        break;
+                    case "refresh":
+                        refresh();
+                        break;
+                    case "LAYTABLE_TIPS":
+                        layer.alert(menuDesc);
+                        break;
+                };
+            });
+
+            form.on('submit('+searchFormName+')', function (data) {
+                treetable.search("#"+tableName,data.field.keyword)
+                return false;
+            });
+
+            form.on('switch(SysMenusEnable)', function (obj) {
+                let operate;
+                if (obj.elem.checked) {
+                    operate = "enable";
+                } else {
+                    operate = "disable";
+                }
+                let loading = layer.load();
+                $.ajax({
+                    url: MODULE_PATH + operate,
+                    data: JSON.stringify({id: this.value}),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'put',
+                    success: function (result) {
+                        layer.close(loading);
+                        if (result.status==200) {
+                            popup.success(result.message);
+                        } else {
+                            popup.failure(result.message);
+                        }
+                    }
+                })
+            });
+
+            let add = function () {
+                layer.open({
+                    type: 2,
+                    title: '新增',
+                    shade: 0.1,
+                    area: ['650px', '500px'],
+                    content: MODULE_PATH + 'add'
+                });
+            }
+
+            let edit = function (obj) {
+                layer.open({
+                    type: 2,
+                    title: '修改',
+                    shade: 0.1,
+                    area: ['650px', '500px'],
+                    content: MODULE_PATH + 'edit?id=' + obj.data['id']
+                });
+            }
+
+            let remove = function (obj) {
+                layer.confirm('确定要删除该菜单', {icon: 3, title: '提示'}, function (index) {
+                    layer.close(index);
+                    let loading = layer.load();
+                    $.ajax({
+                        url: MODULE_PATH + "remove/" + obj.data['id'],
+                        dataType: 'json',
+                        type: 'delete',
+                        success: function (result) {
+                            layer.close(loading);
+                            if (result.status==200) {
+                                popup.success(result.message, function () {
+                                    obj.del();
+                                })
+                            } else {
+                                popup.failure(result.message);
+                            }
+                        }
+                    })
+                });
+            }
+
+            let removeBatch = function(){
+                //获取所有选中id数据并提交数据进行批量删除
+                let checkStatus = table.checkStatus(tableName);
+                let ids = checkStatus.data.map(function (item) {
+                    return item.id;
+                });
+                if (ids.length > 0) {
+                    layer.confirm('确定要删除选中的数据吗？', function(index){
+                        // 执行批量删除操作
+                        let loading = layer.load();
+                        $.ajax({
+                            url: MODULE_PATH + "remove_batch",
+                            type: 'delete',
+                            data: JSON.stringify(ids),
+                            contentType: 'application/json',
+                            success: function (result) {
+                                layer.close(loading);
+                                if (result.status==200) {
+                                    popup.success(result.message);
+                                    window.refresh();
+                                } else {
+                                    popup.failure(result.message);
+                                }
+                            }
+                        });
+                        layer.close(index);
+                    });
+                } else {
+                    popup.warning("请选择要操作的数据");
+                }
+            }
+
+            let refresh = function () {
+                treetable.reload('#'+tableName);
+            }
+        })
+    })
+</script>
+</body>
+</html>

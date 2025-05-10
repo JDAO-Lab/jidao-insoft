@@ -1,0 +1,67 @@
+body{
+    height: 80%;
+    overflow: hidden;
+}
+
+.login-bg{
+    width: 100vw;
+    height: 100vh;
+    background: #efefef;
+}
+.login-footer{
+    color: #999999;
+    background: transparent;
+    text-align: center;
+}
+
+.login{
+    margin: 10% auto;
+    width: 360px;
+    background: #ffffff;
+    padding: 10px;
+    border: 1px solid #efefef;
+    border-radius: 10px;
+    opacity:0.8;
+}
+
+.login-title{
+    text-align: center;
+    font-size: 2rem;
+    line-height: 3;
+}
+
+.login-btn{
+    width: 100%;
+    background: #009688;
+    color: #ffffff;
+    border:none;
+    line-height: 2.5;
+}
+
+.login-hr{
+    background: none;
+}
+
+/* css注释：设置了浏览器宽度不小于1201px时*/
+@media screen and (max-width: 1200px) {
+    .login {
+        margin: 10% auto;
+        width: 35%;
+    }
+}
+
+/* 设置了浏览器宽度不大于1200px时  */
+@media screen and (max-width: 901px) {
+    .login {
+        margin: 10% auto;
+        width: 50%;
+    }
+}
+
+/* 设置了浏览器宽度不大于901px时*/
+@media screen and (max-width: 500px) {
+    .login {
+        margin: 10% auto;
+        width: 80%;
+    }
+}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+<div class="card">
+    <div class="layui-container">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="desc-box">
+                    <div class="desc-title" th:text="${sys.characteristic}"></div>
+                    <div class="desc-content" th:text="${sys.characteristic_description}"></div>
+                    <div class="desc-btn">
+                        <a href="/edition" class="layui-btn layui-btn-danger desc-btn-item">下载安装</a>
+                        <a href="/price" class="layui-btn layui-btn-warm desc-btn-item">了解价格</a>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="info-box">
+                    <div class="info-item">
+                        累积安装量 <span id="downloadCount" th:text="${totalInstallCount}"></span> 台
+                    </div>
+                    <div class="info-item">
+                        累积服务数 <span id="playCount" th:text="${totalPlayCount}"></span> 次
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-md12">
+                <th:block th:each="item, statIndex : ${webCharacteristics}">
+                    <div class="characteristic">
+                            <th:block th:if="${statIndex.index % 2 == 1}">
+                                <img th:src="${item.thumb?:'/default/panel.png'}" alt="" class="characteristic-img">
+                            </th:block>
+                            <div class="characteristic-info">
+                                <h3 class="characteristic-title" th:text="${item.title}"></h3>
+                                <div class="characteristic-content" th:text="${item.description}"></div>
+                                <p class="characteristic-desc" ><i class="layui-icon layui-icon-add-1" style="color: #005EEB"></i> <span th:text="${item.shortDescription}"></span> </p>
+                            </div>
+                            <th:block th:if="${statIndex.index % 2 == 0}">
+                                <img th:src="${item.thumb?:'/default/panel.png'}" alt="" class="characteristic-img">
+                            </th:block>
+                    </div>
+                </th:block>
+            </div>
+
+            <div class="layui-col-md12">
+                <div class="more-app-box">
+                    <div class="more-app-title">
+                        更多应用
+                    </div>
+                    <div class="more-app-list">
+                        <th:block th:each="product : ${webPushProducts}">
+                            <div class="more-app-item">
+                                <a th:href="${product.href}" target="_blank" rel="nofollow">
+                                    <img th:src="${product.logo}" class="more-app-img" th:alt="${product.name}">
+                                    <div class="more-app-item-title" th:text="${product.name}"></div>
+                                </a>
+                            </div>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="go-top">
+                    <div class="go-top-tips">
+                        用心发现，创造美好科技未来~
+                    </div>
+                    <div class="go-top-btn">
+                        <a href="javascript:;" id="goTop">
+                           返回顶部 <i class="layui-icon layui-icon-up"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+<script>
+    $(document).ready(function() {
+        function updateData() {
+            $.ajax({
+                url: "/get_static",
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    $("#downloadCount").text(data.totalInstallCount);
+                    $("#playCount").text(data.totalPlayCount);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error fetching data: ", textStatus, errorThrown);
+                }
+            });
+        }
+
+        // 初始化加载数据
+        updateData();
+
+        // 每两秒更新一次数据
+        setInterval(updateData, 20000);
+    });
+</script>
+
+</html>

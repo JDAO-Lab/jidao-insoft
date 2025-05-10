@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/libs/editor/css/editormd.min.css" />
+    <style>
+        .content {
+            max-width: 1000px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-container">
+    <div class="layui-row layui-col-space15">
+        <div class="content">
+            <div class="markdown-content" id="editormd-view">
+                <textarea style="display:none;" name="editormd-markdown-doc" th:utext="${webPost.content}"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<th:block th:replace="fragments/custom_link::custom-js"></th:block>
+<script src="/libs/editor/editormd.min.js"></script>
+<script src="/libs/editor/lib/marked.min.js"></script>
+<script src="/libs/editor/lib/prettify.min.js"></script>
+
+<script th:inline="javascript">
+    $(function() {
+        let vartestEditormdView = editormd.markdownToHTML("editormd-view");
+    });
+</script>
+<script>
+</script>
+</body>
+</html>

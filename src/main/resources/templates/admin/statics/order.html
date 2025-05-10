@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <link rel="stylesheet" href="/css/other/analysis.css" />
+    <style>
+        .num-card-panel{
+            border-radius: 5px;
+            text-align: center;
+        }
+        .num-card-panel .layui-card-header{
+            font-size: 25px;
+            line-height: 50px;
+            height: 50px;
+        }
+        .num-card-box{
+            background: #ffffff;
+            padding: 2px;
+            margin: 5px;
+        }
+        .number-card-tips{
+            font-size: 15px;
+            padding-left: 8px;
+            padding-top: 16px;
+            line-height: 30px;
+        }
+        .number-card{
+            color: #1f2228;
+            line-height: 60px;
+            font-size: 29px;
+            border-left: 1px solid #eceff9;
+        }
+    </style>
+</head>
+<body>
+<div class="pear-container">
+    <div class="layui-row layui-col-space8">
+        <!--今日数据-->
+        <div class="layui-col-xs6 layui-col-md3">
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-header">今日订单数据</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日订单量
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTodayOrderCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日付费量
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTodayPayCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日收益额
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTodayPayMoney">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日购买率
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTodayPayRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            本日API调用数
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTodayApiCalls">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--近7天-->
+        <div class="layui-col-xs6 layui-col-md3">
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-header">近7日订单数据</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日订单量
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oSevenDayOrderCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日付费量
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oSevenDayPayCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日收益额
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oSevenDayPayMoney">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日购买率
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oSevenDayPayRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            7日API调用数
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oSevenDayApiCalls">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--近1年-->
+        <div class="layui-col-xs6 layui-col-md3">
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-header">近30日订单数据</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日订单量
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oThirtyDayOrderCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日付费量
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oThirtyDayPayCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日收益额
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oThirtyDayPayMoney">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日购买率
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oThirtyDayPayRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            30日API调用数
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oThirtyDayApiCalls">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--历史累计-->
+        <div class="layui-col-xs6 layui-col-md3">
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-header">历史订单数据</div>
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计订单量
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTotalOrderCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计付费量
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTotalPayCount">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计收益额
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTotalPayMoney">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计购买率
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTotalPayRate">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card num-card-panel">
+                <div class="layui-card-body">
+                    <div class="layui-row layui-col-space5 num-card-box">
+                        <div class="layui-col-xs4 layui-col-md4 number-card-tips">
+                            累计API调用数
+                        </div>
+                        <div class="layui-col-xs8 layui-col-md8 number-card" style="color: #28333E;"
+                             id="oTotalApiCalls">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-row layui-col-space10" style="margin-top: 20px">
+        <blockquote class="layui-elem-quote">
+            <p>根据当前所有订单数据进行的实时数据信息的统计~</p>
+        </blockquote>
+    </div>
+</div>
+<script th:inline="javascript">
+    layui.use(['layer', 'count'], function () {
+        var $ = layui.jquery,
+            count = layui.count;
+        // 今日订单统计
+        count.up("oTodayOrderCount", {
+            time: 1000,
+            num: /*[[${todayOrderCount}]]*/ 0, // 今日订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oTodayPayCount", {
+            time: 1000,
+            num: /*[[${todayPayCount}]]*/ 0, // 今日付款订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oTodayPayMoney", {
+            time: 1000,
+            num: /*[[${todayPayMoney}]]*/ 0, // 今日付款金额
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oTodayPayRate", {
+            time: 1000,
+            bit: 2,
+            num: /*[[${todayPayRate}]]*/ 0, // 今日支付率
+            regulator: 50
+        });
+
+        count.up("oTodayApiCalls", {
+            time: 1000,
+            num: /*[[${todayApiCalls}]]*/ 0, // 今日API调用次数
+            bit: 2,
+            regulator: 50
+        });
+
+
+        // 七日订单统计
+        count.up("oSevenDayOrderCount", {
+            time: 1000,
+            num: /*[[${sevenDayOrderCount}]]*/ 0, // 七日订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oSevenDayPayCount", {
+            time: 1000,
+            num: /*[[${sevenDayPayCount}]]*/ 0, // 七日付款订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oSevenDayPayMoney", {
+            time: 1000,
+            num: /*[[${sevenDayPayMoney}]]*/ 0, // 七日付款金额
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oSevenDayPayRate", {
+            time: 1000,
+            bit: 2,
+            num: /*[[${sevenDayPayRate}]]*/ 0, // 七日支付率
+            regulator: 50
+        });
+
+        count.up("oSevenDayApiCalls", {
+            time: 1000,
+            num: /*[[${sevenDayApiCalls}]]*/ 0, // 七日API调用次数
+            bit: 2,
+            regulator: 50
+        });
+
+        // 三十日订单统计
+        count.up("oThirtyDayOrderCount", {
+            time: 1000,
+            num: /*[[${thirtyDayOrderCount}]]*/ 0, // 三十日订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oThirtyDayPayCount", {
+            time: 1000,
+            num: /*[[${thirtyDayPayCount}]]*/ 0, // 三十日付款订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oThirtyDayPayMoney", {
+            time: 1000,
+            num: /*[[${thirtyDayPayMoney}]]*/ 0, // 三十日付款金额
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oThirtyDayPayRate", {
+            time: 1000,
+            bit: 2,
+            num: /*[[${thirtyDayPayRate}]]*/ 0, // 三十日支付率
+            regulator: 50
+        });
+
+        count.up("oThirtyDayApiCalls", {
+            time: 1000,
+            num: /*[[${thirtyDayApiCalls}]]*/ 0, // 三十日API调用次数
+            bit: 2,
+            regulator: 50
+        });
+
+        // 累计订单统计
+        count.up("oTotalOrderCount", {
+            time: 1000,
+            num: /*[[${totalOrderCount}]]*/ 0, // 累计订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oTotalPayCount", {
+            time: 1000,
+            num: /*[[${totalPayCount}]]*/ 0, // 累计付款订单数
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oTotalPayMoney", {
+            time: 1000,
+            num: /*[[${totalPayMoney}]]*/ 0, // 累计付款金额
+            bit: 2,
+            regulator: 50
+        });
+
+        count.up("oTotalPayRate", {
+            time: 1000,
+            bit: 2,
+            num: /*[[${totalPayRate}]]*/ 0, // 累计支付率
+            regulator: 50
+        });
+
+        count.up("oTotalApiCalls", {
+            time: 1000,
+            num: /*[[${totalApiCalls}]]*/ 0, // 累计API调用次数
+            bit: 2,
+            regulator: 50
+        });
+    });
+</script>
+
+</body>
+
+</html>

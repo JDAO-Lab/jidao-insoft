@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_base::custonStyleFrom"></th:block>
+    <style>
+        .fixed-rows{
+            height: 590px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-tab-content">
+    <div class="pear-container">
+        <div class="layui-card">
+            <div class="layui-card-header"> [[${title}]] </div>
+            <div class="layui-card-body">
+                <form class="layui-form" onsubmit="return false;">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">违禁词 (sys.prohibited_words)</label>
+                        <div class="layui-input-block">
+                            <textarea name="prohibited_words" required lay-verify="required" placeholder="多个违禁词以英文,号为分割。"  class="layui-textarea fixed-rows"></textarea>
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">范围：前端用户注册用户名、昵称、评论、简介等处验证。</div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-submit lay-filter="submitForm">保存配置</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script th:inline="javascript">
+    //Demo
+    layui.use(['form','upload'], function(){
+        var form = layui.form;
+        //实例发json字符串为json对象
+        var prohibited_words = /*[[${sys?.prohibited_words}]]*/ "";
+        // 模拟从后端获取的 JSON 数据
+        var inputData = {
+            "prohibited_words": prohibited_words
+        };
+        // 自动填充表单
+        for (var key in inputData) {
+            var value = inputData[key];
+            $('[name="' + key + '"]').val(value);
+        }
+        //必须重新渲染，不然加载不出来
+        form.render();
+        //提交
+        form.on('submit(submitForm)', function(data){
+            var formData = data.field;
+            // 发起 POST 请求
+            $.ajax({
+                url: '/admin/prohibited_words',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    console.log(response);
+                    // 处理成功响应
+                    layer.msg(response.message);
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    // 处理错误情况
+                    layer.msg(response.message);
+                }
+            });
+            return false; // 阻止表单跳转
+        });
+    });
+</script>
+
+</html>

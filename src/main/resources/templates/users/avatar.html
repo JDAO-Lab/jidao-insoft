@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+    <style>
+        .upload-image-container{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: #F7F7F7;
+            width: 100%;
+        }
+        #avatar-preview{
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .up-avatar-tips-p{
+            text-align: center;
+            width: 100%;
+            line-height: 25px;
+            margin: 15px 0px;
+            font-size: 15px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md-offset2 layui-col-sm-offset2 layui-col-md8 layui-col-sm8">
+            <div class="layui-col-md3 layui-col-sm3">
+                <th:block th:replace="fragments/custom_base::userCenterMenu"></th:block>
+            </div>
+            <div class="layui-col-md9 layui-col-sm9">
+                <div class="user-center-content">
+                    <div class="user-center-content-title">[[${title}]]</div>
+                    <div class="user-center-content-body">
+                        <form id="uploadForm" method="post" action="" >
+                            <input type="hidden" name="avatar" id="avatar" th:value="${userInfo.avatar?:'/default/avatar.jpg'}">
+                            <div class="upload-image-container">
+                                <p class="up-avatar-tips-p">点击下方头像即可选择新的头像</p>
+                                <img id="avatar-preview" th:src="${userInfo.avatar?:'/default/avatar.jpg'}" alt="点击上传图片">
+                                <p class="up-avatar-tips-p">建议尺寸150*150，支持: jpg、png等图片格式~</p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+<script type="application/javascript">
+    layui.use(['form','upload','jquery'], function(){
+        var $ = layui.jquery;
+        let form = layui.form;
+        let upload = layui.upload;
+
+        upload.render({
+            elem: '#avatar-preview', //绑定元素
+            url: '/upload', //上传接口
+            exts: 'gif|png|jpg',
+            done: function(res){
+                //上传完毕回调
+                console.log(res);
+                if (res.code === 0) {
+                    //清楚已有头像
+                    $('#avatar').val(res.data); // 将返回的图片链接保存到隐藏域
+                    $('#avatar-preview').attr('src', res.data); // 更新头像预览
+                    //提交保存头像 ajax
+                    $.ajax({
+                        url: '/users/save_avatar',
+                        data: JSON.stringify({'avatar': res.data}),
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        type: 'post',
+                        success: function (result) {
+                            if (result.status == 200) {
+                                layer.msg(result.message, {icon: 1, time: 1000})
+                            } else {
+                                layer.msg(result.message, {icon: 2, time: 1000})
+                            }
+                        }
+                    })
+                } else {
+                    layer.msg(res.msg);
+                }
+            },
+            error: function(res){
+                //请求异常回调
+                layer.msg(res.msg);
+            }
+        });
+    });
+</script>
+</html>

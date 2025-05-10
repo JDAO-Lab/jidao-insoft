@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务错误！</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: left;
+            margin: 20px;
+        }
+        h1 {
+            color: #007bff;
+        }
+        p {
+            font-size: 18px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<h1>系统服务出错，此页无法提供服务！</h1>
+<p>状态码：[[${status}]]</p>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+</head>
+<body>
+<div style="padding: 16px;">
+    <div class="layui-card">
+        <th:block th:replace="fragments/custom_table::commonTitle"></th:block>
+        <div class="layui-card-body">
+            <table class="layui-hide" id="OpinionTable" lay-filter="OpinionTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="OpinionTableToolBar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="removeBatch">
+            批量删除
+        </button>
+    </div>
+    <div class="layui-row" style="margin-top: 10px">
+        <form class="layui-form layui-row layui-col-space16">
+            <div class="layui-col-sm3">
+                <div class="layui-input-wrap">
+                    <input type="text" name="title" placeholder="根据标题内容" lay-affix="clear" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-col-sm3">
+                <div class="layui-input-wrap">
+                    <input type="text" name="content" placeholder="根据反馈内容" lay-affix="clear" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-btn-container layui-col-sm3">
+                <button class="layui-btn layui-btn-sm" lay-submit lay-filter="OpinionSearchBox">检索</button>
+                <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary">重置</button>
+            </div>
+        </form>
+    </div>
+</script>
+<script id="OpinionTableBar" type="text/html">
+    <button
+            class="layui-btn layui-btn-primary layui-btn-sm" lay-event="details"><i class="layui-icon layui-icon-link"> <span style="font-size: 12px"> 详情 </span></i>
+    </button>
+</script>
+
+<script th:inline="javascript">
+    $(function () {
+        //声明配置初始化表格
+        let initConfig = {
+            //请求路径
+            "tableName":"OpinionTable",
+            //此处工具栏要配置名称正确，否则不会显示
+            "toolBarName":"OpinionTableToolBar",
+            "searchFormName":"OpinionSearchBox",
+            //设置表头
+            "tableCols":[
+                [
+                    {type: 'checkbox'},
+                    {field:"id",width:80,title:"ID",sort:true},
+                    {field:"title",width:320,title:"标题"},
+                    {field:"content",width:520,title:"反馈内容"},
+                    {field:"createdAt",title:"创建日期",width:160},
+                    {field:"ip",width:120,title:"提交IP"},
+                    {field:"updatedAt",title:"更新日期",width:160},
+                    {title: '操作', templet: '#OpinionTableBar', width: 160, align: 'center'}
+                ]
+            ],
+            "menuDesc": /*[[${menu_desc}]]*/ ""
+        };
+        //初始化表单信息
+        layui.use(["table", "dropdown", "form","popup"], function () {
+            // ...原有的代码...
+            let table = layui.table;
+            let popup = layui.popup;
+            let form = layui.form;
+            let MODULE_PATH = "/admin/opinion/";
+            let tableCols= initConfig.tableCols;//每页表头
+            let menuDesc= initConfig.menuDesc;//每页描述
+            let tableName = initConfig.tableName;//表格名 每页都不用
+            let toolBarName = initConfig.toolBarName;//滚动条名 每页都不同
+            let searchFormName = initConfig.searchFormName;//搜索表单名 每页都不同
+            //搜索demo
+            form.on('submit('+searchFormName+')', function(data){
+                let formData = data.field;
+                table.reloadData(tableName, {
+                    where: formData,
+                });
+                return false; // 阻止默认 form 跳转
+            });
+            // 创建渲染实例
+            table.render({
+                elem: "#"+tableName,
+                url: MODULE_PATH+"data", //此处填写后端分页接口
+                toolbar: "#"+toolBarName,
+                defaultToolbar: [{
+                    layEvent: 'refresh',
+                    icon: 'layui-icon-refresh',
+                    title: '刷新'
+                },"filter", "exports", "print", {
+                    title: "本页描述",
+                    layEvent: "LAYTABLE_TIPS",
+                    icon: "layui-icon-tips"
+                }],
+                height: "full-35", // 最大高度减去其他容器已占有的高度差
+                page: {
+                    limit: 20 // 每页显示20条数据
+                },
+                css: [ // 重设当前表格样式
+                    ".layui-table-tool-temp{padding-right: 145px;}"
+                ].join(""),
+                cellMinWidth: 80,
+                rowHeight: 100,
+                totalRow: false, // 开启合计行
+                cols: tableCols
+            });
+            //条内事件
+            table.on('tool('+tableName+')', function (obj) {
+                if (obj.event === 'details') {
+                    details(obj);
+                }
+            })
+            // 工具栏事件
+            table.on("toolbar("+tableName+")", function (obj) {
+                switch (obj.event) {
+                    case "removeBatch":
+                        removeBatch();
+                        break;
+                    case "refresh":
+                        refresh();
+                        break;
+                    case "LAYTABLE_TIPS":
+                        layer.alert(menuDesc);
+                        break;
+                };
+            });
+
+            let details = function (obj) {
+                layer.open({
+                    type: 2,
+                    title: '详情',
+                    shade: 0.1,
+                    area: ['650px', '500px'],
+                    content: MODULE_PATH + 'details?id=' + obj.data['id']
+                });
+            }
+
+            let refresh = function (){
+                console.log("刷新");
+                table.reload(tableName, {
+                    where: {},
+                });
+            }
+
+            let removeBatch = function(){
+                //获取所有选中id数据并提交数据进行批量删除
+                let checkStatus = table.checkStatus(tableName);
+                let ids = checkStatus.data.map(function (item) {
+                    return item.id;
+                });
+                if (ids.length > 0) {
+                    layer.confirm('确定要删除选中的意见反馈吗？', function(index){
+                        // 执行批量删除操作
+                        let loading = layer.load();
+                        $.ajax({
+                            url: MODULE_PATH + "remove_batch",
+                            type: 'delete',
+                            data: JSON.stringify(ids),
+                            contentType: 'application/json',
+                            success: function (result) {
+                                layer.close(loading);
+                                if (result.status==200) {
+                                    popup.success(result.message);
+                                    refresh();
+                                } else {
+                                    popup.failure(result.message);
+                                }
+                            }
+                        });
+                        layer.close(index);
+                    });
+                } else {
+                    popup.warning("请选择要操作的数据");
+                }
+            }
+
+        });
+    })
+</script>
+</body>
+</html>

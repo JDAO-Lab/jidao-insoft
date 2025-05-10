@@ -1,0 +1,166 @@
+<!-- fragments/custom_base.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:fragment="commonHead">
+        <meta charset="UTF-8">
+        <title th:text="${title+' - '+sys.short_title}"></title>
+        <meta name="keywords" th:content="${keywords}"/>
+        <meta name="description" th:content="${description}"/>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <link rel="shortcut icon" th:if="${sys.web_ico}" th:href="${sys.web_ico}" />
+    </th:block>
+    <th:block th:fragment="copyrightText">
+        Copyright &#169; 2016-[[${#dates.year(#dates.createNow())}]] [[${sys.author}]] All rights reserved
+    </th:block>
+    <th:block th:fragment="custonStyleFrom">
+        <style>
+            .layui-form-label{
+                width: 28%;
+                text-align: right;
+                padding: 0px;
+            }
+            .layui-input-block {
+                margin-left: 30%;
+            }
+            .layui-form-mid{
+                margin-left: 30%;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<th:block th:fragment="commonNav">
+    <div class="navbar">
+        <div class="layui-container">
+            <div class="layui-row">
+                <div class="layui-col-md12">
+                    <div class="layui-header navbar-box">
+                        <div class="navbar-logo-box">
+                            <a href="/" class="navbar-logo" th:text="${sys.short_title}"></a>
+                        </div>
+                        <div class="navbar-list navbar-menus">
+                            <ul class="layui-nav" id="fixedNav">
+                                <th:block th:each="nav, iterStat : ${webNavList}">
+                                    <li class="layui-nav-item" th:classappend="${nav.href == thisPageHref} ? 'layui-this'">
+                                        <!-- 简化href属性赋值逻辑 -->
+                                        <a th:href="${nav.href ?: '#'}" th:text="${nav.name}"></a>
+                                        <!-- 当有子菜单时显示dl，无需为a标签添加特定条件 -->
+                                        <dl class="layui-nav-child" th:if="${not #lists.isEmpty(nav.children)}">
+                                            <dd th:each="child : ${nav.children}">
+                                                <a th:href="${child.href ?: '#'}" th:classappend="${child.href == thisPageHref} ? 'layui-this'" th:text="${child.name}"></a>
+                                            </dd>
+                                        </dl>
+                                    </li>
+                                </th:block>
+                            </ul>
+                        </div>
+                        <div class="navbar-list navbar-other">
+                            <th:block th:if="${userInfo?.id}">
+                                <div class="user-online-in">
+                                    <a href="/users/info" class="user-online-btn">
+                                        <i class="layui-icon layui-icon-username"></i>
+                                        个人中心
+                                    </a>
+                                    <a href="javascript:;" onclick="logout()" class="user-online-btn">
+                                        <i class="layui-icon layui-icon-logout"></i>退出
+                                    </a>
+                                </div>
+                            </th:block>
+                            <th:block th:unless="${userInfo?.id}">
+                                <ul class="layui-nav">
+
+                                    <li class="layui-nav-item" th:classappend="${'/users/login' == thisPageHref} ? 'layui-this'"><a href="/users/login">登录</a></li>
+                                    <li class="layui-nav-item" th:classappend="${'/users/reg' == thisPageHref} ? 'layui-this'"><a href="/users/reg">注册</a></li>
+                                </ul>
+                            </th:block>
+                        </div>
+                        <a href="javascript:;" class="navbar-more" id="moreMenus">
+                            <i class="layui-icon layui-icon-menu layui-icon-more"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:fragment="commonSearch">
+    <div class="search-container">
+        <form action="/search" class="layui-form search-form">
+            <div class="layui-input-inline search-input">
+                <input type="text" name="keyword" placeholder="请输入搜索关键词" autocomplete="off" class="layui-input" th:value="${keyword}">
+            </div>
+            <button type="submit" class="layui-btn">
+                <i class="layui-icon layui-icon-search"></i>
+            </button>
+        </form>
+    </div>
+</th:block>
+<th:block th:fragment="commonFeedback">
+    <div class="tips-bar">
+        如需联系人工客服，可直接点击此链接。
+        <a th:href="${sys.customer_service?:'javascript:;'}" class="layui-btn layui-btn-xs layui-btn-normal">
+            <i class="layui-icon layui-icon-chat"></i>
+            <span>联系客服</span>
+        </a>
+    </div>
+</th:block>
+<th:block th:fragment="commonFooter">
+    <footer class="footer">
+        <div class="layui-container">
+            <div class="layui-row">
+                <div class="layui-col-md12">
+                    <ul class="footer-menu">
+                        <th:block th:each="nav : ${fotNavList}">
+                            <li><a th:href="${nav.href ?: '#'}" th:text="${nav.name}" th:classappend="${nav.href == thisPageHref} ? 'foot-menu-this'"></a></li>
+                        </th:block>
+                    </ul>
+                    <div class="footer-icp">
+                        ICP备：<a th:href="${sys.icp_href}" th:text="${sys.icp_number}"></a>
+                    </div>
+                    <div class="footer-copyright">
+                        Copyright © 2016-[[${#dates.year(#dates.createNow())}]] [[${sys.author}]]. All Rights Reserved.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</th:block>
+<th:block th:fragment="userCenterMenu">
+    <ul class="user-center-menu">
+        <th:block th:each="nav : ${userNavList}">
+            <li th:classappend="${nav.href == thisPageHref} ? ' selected'" class="user-center-menu-row"><a th:href="${nav.href}" class="menu" th:text="${nav.name}"></a></li>
+        </th:block>
+    </ul>
+</th:block>
+</body>
+<th:block th:fragment="commonScript">
+    <script type="application/javascript">
+        layui.use(['element', 'jquery'], function(){
+            var element = layui.element;
+            var $ = layui.jquery;
+
+            element.on('nav(fixedNav)', function(elem){
+                //实例化主导航信息
+                $(elem).find('.layui-nav-child');
+            });
+            //点击moreMenus 显示菜单 要有动画
+            $("#moreMenus").click(function () {
+                $(".navbar-list").slideToggle(200);
+            });
+
+            // 点击回到顶部按钮时的处理函数
+            $('#goTop').on('click', function(){
+                // 使用Layui的自定义动画实现平滑滚动到顶部
+                $('html,body').animate({ scrollTop: 0 }, 800); // 800为动画持续时间，单位为毫秒
+            });
+        });
+    </script>
+    <!--统计代码-->
+    <script type="application/javascript">
+        [[${sys.static_script}]]
+    </script>
+</th:block>
+</html>

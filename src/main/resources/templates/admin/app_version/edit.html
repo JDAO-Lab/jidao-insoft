@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/css/other/form.css" />
+    <style>
+        .app-ver-icon-upload .app-ver-icon{
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+        }
+        #downUrl{
+            display: none;
+        }
+        .app-ver-icon-upload{
+            line-height: 35px;
+            height: 35px;
+            background: #efefef;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="formBox">
+    <form action="" class="layui-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+                    <input type="hidden" name="id" th:value="${appVersion.id}">
+                    <input type="hidden" name="cid" th:value="${appVersion.cid}">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">版本标题</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="title" th:value="${appVersion.title}" placeholder="诸如：2024年5月12日 重大更新说明"
+                                   type="text">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">版本号</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="version" placeholder="例：0.0.1" th:value="${appVersion.version}"
+                                   type="text">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">更新日志</label>
+                        <div class="layui-input-block">
+                            <textarea name="upLog" placeholder="多行文本描述本次更新的主要内容~" lay-verify="required" class="layui-textarea" maxlength="255" th:text="${appVersion.upLog}"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">下载方式</label>
+                        <div class="layui-input-block">
+                            <select name="downType" lay-filter="downType"></select>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item" id="downUpFile">
+                        <label class="layui-form-label">上传文件</label>
+                        <div class="layui-input-block">
+                            <div class="app-ver-icon-upload" id="upFileTrigger">
+                                <i class="layui-icon layui-icon-upload"></i>
+                                <span class="layui-form-mid" th:text="${#strings.length(appVersion.downUrl) > 0 ? '已上传：' + #strings.substring(appVersion.downUrl, 0, 30) + '...' : '点击上传文件(.zip, .tar.gz, .7z等类型)' }"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item" id="downUrl">
+                        <label class="layui-form-label">下载地址</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" name="downUrl" placeholder="例：http://" th:value="${appVersion.downUrl}"
+                                   type="text">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">提取码</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" name="downPwd" placeholder="例：12839" th:value="${appVersion.downPwd}"
+                                   type="number">
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="formBoxBottom">
+            <div class="button-container">
+                <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="app-ver-save" lay-submit="" type="submit">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button class="layui-btn layui-btn-sm" type="reset">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+    layui.use(['form', 'jquery','upload'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let upload = layui.upload;
+        let MODULE_PATH = "/admin/app_version/";
+        let cid = /*[[${appVersion.cid}]]*/ 0;
+        let downType = /*[[${appVersion.downType}]]*/ 0;
+        let upFile = upload.render({
+            elem: '#upFileTrigger', //绑定元素
+            url: '/upload', //上传接口
+            accept: 'file', // 允许上传所有文件类型
+            exts: 'zip|tar.gz|7z',
+            before: function(obj){ // 上传之前的操作
+                // 可以在这里添加验证或其他预处理
+                layer.load(2); // 添加加载动画
+            },
+            done: function(res){
+                layer.closeAll('loading'); // 关闭加载动画
+                if(res.code == 0){
+                    // 上传成功，将下载地址填充到表单
+                    $('input[name="downUrl"]').val(res.data);
+                    var truncatedData = res.data.length > 30 ? res.data.substring(0, 30) + '...' : res.data;
+                    $("#upFileTrigger").html("文件上传成功：" + truncatedData);
+                    layer.msg('文件上传成功');
+                } else {
+                    $("#upFileTrigger").html("文件上传失败，请重试~");
+                    layer.msg('文件上传失败: ' + res.msg);
+                }
+            },
+            error: function(){
+                layer.closeAll('loading'); // 关闭加载动画
+                layer.msg('文件上传发生错误');
+            }
+        });
+
+        //下载类型下拉框
+        $.get("/enum/get_down_type", function(result) {
+            let select = $("select[name='downType']");
+            $.each(result.data, function(index, item) {
+                var option = $("<option value='" + item.code + "'>" + item.value + "</option>");
+
+                // 检查item.code 设置selected属性
+                if (item.code === downType) {
+                    option.attr('selected', 'selected');
+                }
+
+                select.append(option);
+                console.log(item);
+            });
+
+            form.render("select");
+        });
+
+        //监听下拉框，显示上传按钮与文本框
+        form.on('select(downType)', function(data){
+            let downTypeVal = data.value; // 获取选中的值
+            console.log("data:"+downTypeVal);
+            if(downTypeVal === '' || downTypeVal === '0'){ // 如果选择的是0或未选择
+                // 显示上传组件
+                $('#downUpFile').show(); // 假设这里有一个隐藏的触发按钮
+                $("#downUrl").hide();
+                $('input[name="downUrl"]').val(''); // 隐藏并清空下载地址输入框
+            } else {
+                // 隐藏上传组件
+                $('#downUpFile').hide(); // 隐藏上传触发按钮
+                $("#downUrl").show();
+                $('input[name="downUrl"]').val(''); // 显示下载地址输入框
+            }
+        });
+
+        form.on('submit(app-ver-save)', function (data) {
+            $.ajax({
+                url: MODULE_PATH+'update',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status==200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.form.submit('AppVerChildRefresh');
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            })
+            return false;
+        });
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

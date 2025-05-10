@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+</head>
+<body>
+<div style="padding: 16px;">
+    <div class="layui-card">
+        <th:block th:replace="fragments/custom_table::commonTitle"></th:block>
+        <div class="layui-card-body">
+            <table class="layui-hide" id="WebUserTable" lay-filter="WebUserTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="WebUserTableToolBar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="disableBatch">
+            批量禁用
+        </button>
+        <button class="layui-btn layui-btn-normal layui-btn-sm" lay-event="enableBatch">
+            批量启用
+        </button>
+    </div>
+    <div class="layui-row" style="margin-top: 10px">
+        <form class="layui-form layui-row layui-col-space16">
+            <div class="layui-col-sm3">
+                <div class="layui-input-wrap">
+                    <input type="text" name="username" placeholder="根据用户名" lay-affix="clear" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-col-sm3">
+                <div class="layui-input-wrap">
+                    <input type="text" name="nickname" placeholder="根据昵称" lay-affix="clear" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-col-sm3">
+                <div class="layui-input-wrap">
+                    <input type="text" name="phone" placeholder="根据手机号" lay-affix="clear" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-col-sm3">
+                <div class="layui-input-wrap">
+                    <input type="text" name="email" placeholder="根据邮箱" lay-affix="clear" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-btn-container layui-col-sm3">
+                <button class="layui-btn layui-btn-sm" lay-submit lay-filter="WebUserSearchBox">检索</button>
+                <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary">重置</button>
+            </div>
+        </form>
+    </div>
+</script>
+<script id="WebUserTableBar" type="text/html">
+    <button
+            class="layui-btn layui-btn-primary layui-btn-sm" lay-event="details"><i class="layui-icon layui-icon-link"> <span style="font-size: 12px"> 详情 </span></i>
+    </button>
+</script>
+<script id="WebUserEnable" type="text/html">
+    <input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用"
+           lay-filter="WebUserEnable" {{ d.enable== true ? 'checked' : '' }}>
+</script>
+<script id="WebUserAvatar" type="text/html">
+    <img src="{{ d.avatar }}" alt="头像" style="width: 30px; height: 30px;">
+</script>
+
+<script th:inline="javascript">
+    $(function () {
+        //声明配置初始化表格
+        let initConfig = {
+            //请求路径
+            "tableName":"WebUserTable",
+            //此处工具栏要配置名称正确，否则不会显示
+            "toolBarName":"WebUserTableToolBar",
+            "searchFormName":"WebUserSearchBox",
+            //设置表头
+            "tableCols":[
+                [
+                    {type: 'checkbox'},
+                    {field:"id",width:80,title:"ID",sort:true},
+                    {field:"avatar",width:60,title:"头像",templet: '#WebUserAvatar'},
+                    {field:"username",width:110,title:"用户名"},
+                    {field:"nickname",width:110,title:"昵称"},
+                    {field:"sexText",width:60,title:"性别"},
+                    {field:"phone",width:150,title:"手机"},
+                    {field:"email",width:150,title:"邮箱"},
+                    {field:"enable",width:90,title:"状态",templet: '#WebUserEnable'},
+                    {field:"createdAt",title:"创建日期",width:160},
+                    {field:"loginAt",width:160,title:"最后登录日期",sort:true},
+                    {field:"ip",width:120,title:"最近登录IP"},
+                    {title: '操作', templet: '#WebUserTableBar', width: 160, align: 'center'}
+                ]
+            ],
+            "menuDesc": /*[[${menu_desc}]]*/ ""
+        };
+        //初始化表单信息
+        layui.use(["table", "dropdown", "form","popup"], function () {
+            // ...原有的代码...
+            let table = layui.table;
+            let popup = layui.popup;
+            let form = layui.form;
+            let MODULE_PATH = "/admin/users/";
+            let tableCols= initConfig.tableCols;//每页表头
+            let menuDesc= initConfig.menuDesc;//每页描述
+            let tableName = initConfig.tableName;//表格名 每页都不用
+            let toolBarName = initConfig.toolBarName;//滚动条名 每页都不同
+            let searchFormName = initConfig.searchFormName;//搜索表单名 每页都不同
+            //搜索demo
+            form.on('submit('+searchFormName+')', function(data){
+                let formData = data.field;
+                table.reloadData(tableName, {
+                    where: formData,
+                });
+                return false; // 阻止默认 form 跳转
+            });
+            // 创建渲染实例
+            table.render({
+                elem: "#"+tableName,
+                url: MODULE_PATH+"data", //此处填写后端分页接口
+                toolbar: "#"+toolBarName,
+                defaultToolbar: [{
+                    layEvent: 'refresh',
+                    icon: 'layui-icon-refresh',
+                    title: '刷新'
+                },"filter", "exports", "print", {
+                    title: "本页描述",
+                    layEvent: "LAYTABLE_TIPS",
+                    icon: "layui-icon-tips"
+                }],
+                height: "full-35", // 最大高度减去其他容器已占有的高度差
+                page: {
+                    limit: 20 // 每页显示20条数据
+                },
+                css: [ // 重设当前表格样式
+                    ".layui-table-tool-temp{padding-right: 145px;}"
+                ].join(""),
+                cellMinWidth: 80,
+                rowHeight: 100,
+                totalRow: false, // 开启合计行
+                cols: tableCols
+            });
+            //条内事件
+            table.on('tool('+tableName+')', function (obj) {
+                if (obj.event === 'details') {
+                    details(obj);
+                }
+            })
+            // 工具栏事件
+            table.on("toolbar("+tableName+")", function (obj) {
+                switch (obj.event) {
+                    case "disableBatch":
+                        disableBatch();
+                        break;
+                    case "enableBatch":
+                        enableBatch();
+                        break;
+                    case "refresh":
+                        refresh();
+                        break;
+                    case "LAYTABLE_TIPS":
+                        layer.alert(menuDesc);
+                        break;
+                };
+            });
+
+            form.on('switch(WebUserEnable)', function (obj) {
+                let operate;
+                if (obj.elem.checked) {
+                    operate = "enable";
+                } else {
+                    operate = "disable";
+                }
+                let loading = layer.load();
+                $.ajax({
+                    url: MODULE_PATH + operate,
+                    data: JSON.stringify({id: this.value}),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'put',
+                    success: function (result) {
+                        layer.close(loading);
+                        if (result.status==200) {
+                            popup.success(result.message);
+                        } else {
+                            popup.failure(result.message);
+                        }
+                    }
+                })
+            });
+
+            let details = function (obj) {
+                layer.open({
+                    type: 2,
+                    title: '用户详情',
+                    shade: 0.1,
+                    area: ['650px', '500px'],
+                    content: MODULE_PATH + 'details?id=' + obj.data['id']
+                });
+            }
+
+            let refresh = function (){
+                console.log("刷新");
+                table.reload(tableName, {
+                    where: {},
+                });
+            }
+
+            let disableBatch = function(){
+                //获取所有选中id数据并提交数据进行批量删除
+                let checkStatus = table.checkStatus(tableName);
+                let ids = checkStatus.data.map(function (item) {
+                    return item.id;
+                });
+                if (ids.length > 0) {
+                    layer.confirm('确定要禁用选中的用户账号吗？', function(index){
+                        // 执行批量删除操作
+                        let loading = layer.load();
+                        $.ajax({
+                            url: MODULE_PATH + "disable_batch",
+                            type: 'put',
+                            data: JSON.stringify(ids),
+                            contentType: 'application/json',
+                            success: function (result) {
+                                layer.close(loading);
+                                if (result.status==200) {
+                                    popup.success(result.message);
+                                    refresh();
+                                } else {
+                                    popup.failure(result.message);
+                                }
+                            }
+                        });
+                        layer.close(index);
+                    });
+                } else {
+                    popup.warning("请选择要操作的数据");
+                }
+            }
+
+            let enableBatch = function (){
+                //获取所有选中id数据并提交数据进行批量删除
+                let checkStatus = table.checkStatus(tableName);
+                let ids = checkStatus.data.map(function (item) {
+                    return item.id;
+                });
+                if (ids.length > 0) {
+                    layer.confirm('确定要启用选中的用户账号吗？', function(index){
+                        // 执行批量删除操作
+                        let loading = layer.load();
+                        $.ajax({
+                            url: MODULE_PATH + "enable_batch",
+                            type: 'put',
+                            data: JSON.stringify(ids),
+                            contentType: 'application/json',
+                            success: function (result) {
+                                layer.close(loading);
+                                if (result.status==200) {
+                                    popup.success(result.message);
+                                    refresh();
+                                } else {
+                                    popup.failure(result.message);
+                                }
+                            }
+                        });
+                        layer.close(index);
+                    });
+                } else {
+                    popup.warning("请选择要操作的数据");
+                }
+            }
+        });
+    })
+</script>
+</body>
+</html>

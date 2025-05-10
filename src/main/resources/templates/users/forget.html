@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md-offset3 layui-col-sm-offset3 layui-col-md6 layui-col-sm6">
+            <div class="custom-form">
+                <div class="title">
+                    <h2> 找回密码 </h2>
+                </div>
+                <div class="custom-form-body">
+                    <form class="layui-form" action="your-forget-action-url" method="post">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">手机号：</label>
+                            <div class="layui-input-block">
+                                <input type="text" name="phone" id="phone" required lay-verify="required" placeholder="您的注册时的手机号" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">验证码：</label>
+                            <div class="layui-input-block sms-code">
+                                <input type="text" name="sms_code" required lay-verify="required" placeholder="6位短信验证码。" autocomplete="off" class="layui-input sms-code-input">
+                                <button id="sendBtn" class="layui-btn layui-btn-warm" type="button" onclick="ccModal('/send_sms_code?stype=3&phone='+$('#phone').val(),200,235,'发送短信验证码')">获取验证码</button>
+                            </div>
+                        </div>
+
+                        <div class="layui-form-item">
+                            <div class="layui-input-block">
+                                <button class="layui-btn" lay-submit lay-filter="forget">下一步</button>
+                                <a href="/users/reg" class="layui-btn layui-btn-primary">注册账号</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+<script type="application/javascript">
+    layui.use(['form'], function(){
+        var form = layui.form;
+        //监听提交
+        form.on('submit(forget)', function(data){
+            //POST提交数据
+            $.ajax({
+                url: '/users/forget_request',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status == 200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            window.location.href = "/users/forget_pwd?t=" + result.data.t + "&s=" + result.data.s;
+                        })
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000})
+                    }
+                }
+            })
+            return false;
+        });
+    });
+</script>
+</html>

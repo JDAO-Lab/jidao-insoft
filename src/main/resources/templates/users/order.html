@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::home-css"></th:block>
+    <th:block th:replace="fragments/custom_link::home-js"></th:block>
+    <script src="/libs/qcodejs/qrcode.min.js"></script>
+    <style>
+        .payment-container {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .qr-code {
+            width: 300px;
+            height: 300px;
+            margin: 5px auto;
+        }
+        .info {
+            font-size: 15px;
+            margin-top: 10px;
+            background: #f7f7f7;
+            padding: 15px;
+        }
+        .info p{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+        .success-message {
+            color: green;
+            font-size: 20px;
+            display: none;
+            margin-top: 20px;
+        }
+        .payment-options  {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+        }
+        .payment-options .pay-btn{
+            background: #FFFFFF;
+            width: 240px;
+        }
+        .payment-options .pay-btn img{
+            width: 100%;
+        }
+        .payment-options .selected{
+            background: #F7F7F7;
+        }
+        #payInfoBtnBox{
+            margin-top: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+<th:block th:replace="fragments/custom_base::commonNav"></th:block>
+<div class="layui-container">
+    <div class="layui-row">
+        <div class="layui-col-md-offset3 layui-col-sm-offset3 layui-col-md6 layui-col-sm6">
+            <div class="layui-card" style="margin-top: 20px;margin-bottom: 20px;">
+                <div class="layui-card-header" style="font-weight: bold;font-size: 16px;" th:text="${title}"></div>
+                <div class="layui-card-body">
+                    <div class="payment-options">
+                        <a href="javascript:;" onclick="initiatePayment('wxpay')" class="pay-btn"
+                           th:if="${allEnable||payType=='wxpay'}"
+                           th:classappend="${payType=='wxpay'?'selected':''}"
+                        >
+                            <img src="/default/wxpay.png" class="pay-btn-icon">
+                        </a>
+                        <a href="javascript:;" onclick="initiatePayment('alipay')" class="pay-btn"
+                           th:if="${allEnable||payType=='alipay'}"
+                           th:classappend="${payType=='alipay'?'selected':''}">
+                            <img src="/default/alipay.png" class="pay-btn-icon">
+                        </a>
+                    </div>
+                    <div class="payment-container" id="paymentContainer">
+                        <img id="qrCodeInfo" class="qr-code"
+                             src="/default/code_loading.png" alt="支付二维码"
+                        >
+                        <div id="qrCode" class="qr-code" style="display: none"></div>
+                        <div class="success-message" id="successMessage">支付完成！</div>
+                        <div class="info">
+                            <p>服务名称：<span id="serviceName">[[${income?.name}]]</span></p>
+                            <p>支付金额：<span id="totalAmount">￥[[${income?.price}]]元</span></p>
+                            <p>订单编号：<span id="paymentOrderId">---</span></p>
+                            <p>下单日期：<span id="paymentDate"></span></p>
+                        </div>
+                        <div id="payInfoBtnBox">
+                            <p>订单已创建，请点击立即支付。</p>
+                            <button class="layui-btn layui-btn-sm layui-btn-warm" id="payInfoBtn" onclick="goToPay()">立即支付</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/custom_base :: commonFooter"></th:block>
+</body>
+
+<th:block th:replace="fragments/custom_base :: commonScript"></th:block>
+
+<script type="application/javascript">
+const serviceName = "[[${income?.name}]]";
+const totalAmount = "[[${income?.price}]]";
+const currentDate = new Date().toLocaleDateString();
+let aliFormData = null;
+let paymentType = "[[${payType}]]";
+let intervalId = null;
+let lockOff = false;
+
+// 初始化页面
+$(document).ready(function () {
+    $('#paymentDate').text(currentDate);
+    initiatePayment(paymentType);
+});
+
+// 发起支付请求
+function initiatePayment(type) {
+    if (lockOff){
+        ccMsg("您已成功支付，可前往个人中心查看充值情况~")
+        return;
+    }
+    paymentType = type;
+    const $container = $('#paymentContainer');
+    $container.show();
+    $container.find('.success-message, #payInfoBtnBox').hide();
+    $container.find('.qr-code').hide();
+    $container.find('#qrCodeInfo').show().attr('src', '/default/code_loading.png');
+
+    // 清除所有支付按钮的选中状态
+    $('.payment-options .pay-btn').removeClass('selected');
+    $(`[onclick*="${type}"]`).addClass('selected');
+
+    fetch('/pay/create_order?vtype=web&uPayType=' + type, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            subject: serviceName,
+            totalAmount: totalAmount,
+            body: serviceName,
+            totalFee: Math.round(totalAmount * 100),
+            incomeId: "[[${income?.id}]]"
+        })
+    })
+    .then(response => response.json())
+    .then(res => {
+        if (res.status === 200) {
+            $container.find('#qrCodeInfo').hide();
+            const data = res.data;
+            handlePaymentResponse(type, data);
+        } else {
+            ccMsg(res.message, -1);
+            $container.find('#qrCodeInfo').attr('src', '/default/code_error.png');
+        }
+    })
+    .catch(error => {
+        console.error('订单创建出错:', error);
+    });
+}
+
+// 处理支付响应
+function handlePaymentResponse(type, data) {
+    listenForPaymentResult(type);
+    //渲染订单号：
+    $('#paymentOrderId').text(data.outTradeNo);
+    const infoBody = JSON.parse(data.infoBody);
+    switch (type) {
+        case 'wxpay':
+            generateQRCode(infoBody.code_url);
+            break;
+        case 'alipay':
+            aliFormData = infoBody.body;
+            $('#payInfoBtnBox').show();
+            break;
+    }
+}
+
+// 分流立即支付
+function goToPay() {
+    switch (paymentType) {
+        case 'alipay':
+            goToAliPay()
+            break;
+        default:
+            console.log("暂无此类型支付方式~")
+            break;
+    }
+}
+
+// 生成二维码图片
+function generateQRCode(url) {
+    const qrCodeElement = document.getElementById('qrCode');
+    qrCodeElement.style.display = 'block';
+    qrCodeElement.innerHTML = '';
+    new QRCode(qrCodeElement, {
+        text: url,
+        width: 300,
+        height: 300,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+// 实时监听支付结果 根据订单号
+function listenForPaymentResult(type) {
+    //检查是否已有定时器如果有则清除
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
+    intervalId = setInterval(() => {
+        fetch('/pay/notify/'+type, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                vtype: 'web',
+                incomeId: "[[${income?.id}]]",
+                out_trade_no: $('#paymentOrderId').text().trim(),
+                custCheck:true
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 200) {
+                //隐藏二维码
+                $('#qrCode').hide();
+                $('#successMessage').show();
+                //影藏支付按钮
+                $('#payInfoBtnBox').hide();
+                clearInterval(intervalId);
+                //开启生成二维码锁
+                lockOff = true;
+            }
+        })
+        .catch(error => {
+            console.error('支付结果监听出错:', error);
+        });
+    }, 2000);
+}
+
+// 前往支付宝支付
+function goToAliPay() {
+    const decodedBody = aliFormData;
+    const doc = new DOMParser().parseFromString(decodedBody, 'text/html');
+    const form = doc.querySelector('form[name="punchout_form"]');
+
+    if (!form) {
+        console.error('未找到表单元素');
+        return;
+    }
+
+    const action = form.getAttribute('action');
+    const inputs = Array.from(form.querySelectorAll('input[type="hidden"]')).map(input => ({
+        name: input.getAttribute('name').trim(),
+        value: input.getAttribute('value').trim()
+    }));
+    console.log("inputs",inputs);
+
+    const newForm = document.createElement('form');
+    newForm.setAttribute('name', 'punchout_form');
+    newForm.setAttribute('method', 'post');
+    newForm.setAttribute('action', action);
+    newForm.setAttribute('target', '_blank');
+    newForm.setAttribute('accept-charset', 'UTF-8');  // 添加这一行
+
+    inputs.forEach(inputData => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'hidden');
+        input.setAttribute('name', inputData.name.trim());
+        input.setAttribute('value', inputData.value.trim());
+        newForm.appendChild(input);
+    });
+
+    document.body.appendChild(newForm);
+    newForm.submit();
+}
+
+</script>
+</html>

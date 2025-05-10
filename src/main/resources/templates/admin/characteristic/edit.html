@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="fragments/custom_base::commonHead"></th:block>
+    <th:block th:replace="fragments/custom_link::pear-css"></th:block>
+    <link rel="stylesheet" href="/css/other/form.css" />
+    <style>
+        .characteristic-icon-upload .characteristic-icon{
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+        }
+        .thumb-upload .thumb{
+            width: 300px;
+            height: 200px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="formBox">
+    <form action="" class="layui-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+                    <input type="hidden" name="id" th:value="${webCharacteristic.id}">
+                    <div class="layui-form-item thumb-upload">
+                        <label class="layui-form-label">缩略图</label>
+                        <div class="layui-input-block">
+                            <div class="thumb-preview">
+                                <img class="thumb" id="thumb-preview" th:src="${webCharacteristic.thumb?:'/default/upload.png'}" alt="上传缩略图" />
+                            </div>
+                            <input id="thumb" name="thumb" type="hidden" th:value="${webCharacteristic.thumb?:'/default/upload.png'}"/>
+                            <div class="layui-form-mid layui-word-aux">点击即可上传图片,建议格式jpg|png,尺寸:300x200。</div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">特性名称</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="title" th:value="${webCharacteristic.title}" placeholder="5个字左右的特点说明"
+                                   type="text">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">特性描述</label>
+                        <div class="layui-input-block">
+                            <textarea name="description" required lay-verify="required" placeholder="200个字描述特点。" th:text="${webCharacteristic.description}"  maxlength="100" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">简短描述</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" lay-verify="required" name="shortDescription" th:value="${webCharacteristic.shortDescription}" placeholder="100个字左右的简短描述"
+                                   type="text">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">排序</label>
+                        <div class="layui-input-block">
+                            <input autocomplete="off" class="layui-input" value="0" name="sort" placeholder="正序排序 0开头" th:value="${webCharacteristic.sort}"
+                                   type="number">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="formBoxBottom">
+            <div class="button-container">
+                <button class="layui-btn layui-btn-primary layui-btn-sm" lay-filter="characteristic-update" lay-submit="" type="submit">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button class="layui-btn layui-btn-sm" type="reset">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<th:block th:replace="fragments/custom_link::pear-js"></th:block>
+<script th:inline="javascript">
+    layui.use(['form', 'jquery','upload'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+        let MODULE_PATH = "/admin/characteristic/";
+        let upload = layui.upload;
+
+        upload.render({
+            elem: '#thumb-preview', //绑定元素
+            url: '/upload', //上传接口
+            exts: 'gif|png|jpg',
+            done: function(res){
+                //上传完毕回调
+                console.log(res);
+                if (res.code === 0) {
+                    //清楚已有缩略图
+                    $('#thumb').val(res.data); // 将返回的图片链接保存到隐藏域
+                    $('#thumb-preview').attr('src', res.data); // 更新缩略图预览
+                } else {
+                    layer.msg(res.msg);
+                }
+            },
+            error: function(res){
+                //请求异常回调
+                layer.msg(res.msg);
+            }
+        });
+
+        form.on('submit(characteristic-update)', function (data) {
+            $.ajax({
+                url: MODULE_PATH+'update',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'post',
+                success: function (result) {
+                    if (result.status==200) {
+                        layer.msg(result.message, {icon: 1, time: 1000}, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));//关闭当前页
+                            parent.layui.table.reload("CharacteristicTable", {
+                                where: {},
+                            });
+                        });
+                    } else {
+                        layer.msg(result.message, {icon: 2, time: 1000});
+                    }
+                }
+            })
+            return false;
+        });
+    })
+</script>
+<script>
+</script>
+</body>
+</html>

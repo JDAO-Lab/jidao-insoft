@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 该页面已失效！</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: left;
+            margin: 20px;
+        }
+        h1 {
+            color: #007bff;
+        }
+        p {
+            font-size: 18px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<h1>404 该页面已失效！</h1>
+<p id="countdownText">倒计时结束后，将跳转至首页~</p>
+<script>
+    // 设置倒计时时间为15秒
+    const countdownTime = 15;
+
+    // 获取显示倒计时的元素
+    const countdownElement = document.getElementById('countdownText');
+
+    let countdown = countdownTime;
+
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        countdownElement.innerText = `>>${countdown}秒后，将跳转至首页~`;
+
+        if (countdown === 0) {
+            clearInterval(countdownInterval);
+            window.location.href = '/'; // 请替换为您的首页URL
+        }
+    }, 1000);
+</script>
+
+</body>
+</html>
