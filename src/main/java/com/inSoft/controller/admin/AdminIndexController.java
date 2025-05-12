@@ -80,21 +80,21 @@ public class AdminIndexController extends BaseController {
             diskFreeSpace = -1L; // 处理无效或无法访问的路径
             log.info("获取磁盘信息错误~");
         }
-        Connection mysqlConnection;
+        String mysqlVersion = "Unknown";
+        Connection mysqlConnection = null;
         try {
-            mysqlConnection = DataSourceUtils.getConnection(dataSource); // 获取Connection
-        } catch (Exception e) {
-            mysqlConnection = null; // 处理获取Connection失败的情况
-            log.info("连接数据库对象错误~");
-        }
-
-        String mysqlVersion;
-        try {
+            mysqlConnection = DataSourceUtils.getConnection(dataSource);
             mysqlVersion = sysInfoUtil.getMySQLVersion(mysqlConnection);
         } catch (SQLException e) {
-            mysqlVersion = "Unknown"; // 处理查询失败的情况
-            // 可在此处记录错误或抛出异常（根据您的需求）
-            log.info("获取磁盘信息错误~");
+            log.error("获取MySQL版本错误~", e);
+        } finally {
+            if (mysqlConnection != null) {
+                try {
+                    mysqlConnection.close();
+                } catch (SQLException e) {
+                    log.error("关闭连接时发生错误", e);
+                }
+            }
         }
 
         // 添加到 ModelAndView
