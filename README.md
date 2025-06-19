@@ -213,3 +213,8 @@ analysis(1,1);//前者为类型，后者为数字，类型信息在StaticTypeEnu
 详细在api相关配置文件及工具类中。
 
 token可自动生成。
+
+### 10.跳过测试打包
+```
+mvn package -DskipTests=true
+```
